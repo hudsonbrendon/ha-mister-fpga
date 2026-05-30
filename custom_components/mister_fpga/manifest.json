@@ -1,0 +1,12 @@
+{
+  "domain": "mister_fpga",
+  "name": "MiSTer FPGA",
+  "codeowners": ["@hudsonbrendon"],
+  "config_flow": true,
+  "documentation": "https://github.com/hudsonbrendon/ha-mister-fpga",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/hudsonbrendon/ha-mister-fpga/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

@@ -1,0 +1,3 @@
+pytest-homeassistant-custom-component==0.13.205
+aioresponses
+ruff

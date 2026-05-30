@@ -1,0 +1,102 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MiSTer FPGA",
+        "description": "Connect to the mrext Remote service running on your MiSTer.",
+        "data": {
+          "name": "Name",
+          "host": "Host or IP address",
+          "port": "Port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect. Check the IP and that the Remote service is running on the MiSTer."
+    },
+    "abort": {
+      "already_configured": "This MiSTer is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "MiSTer FPGA options",
+        "data": {
+          "scan_interval": "Scan interval (seconds)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "online": { "name": "Online" }
+    },
+    "sensor": {
+      "core": { "name": "Core" },
+      "system": { "name": "System" },
+      "game": { "name": "Game" },
+      "version": { "name": "Version" },
+      "hostname": { "name": "Hostname" },
+      "ip_address": { "name": "IP address" }
+    },
+    "button": {
+      "reboot": { "name": "Reboot" },
+      "go_to_menu": { "name": "Go to menu" },
+      "take_screenshot": { "name": "Take screenshot" },
+      "restart_remote": { "name": "Restart Remote" },
+      "index_games": { "name": "Index Games" }
+    },
+    "select": {
+      "launch_system": { "name": "Launch system" }
+    },
+    "switch": {
+      "background_music": { "name": "Background music" }
+    },
+    "image": {
+      "latest_screenshot": { "name": "Latest screenshot" }
+    }
+  },
+  "services": {
+    "launch_game": {
+      "name": "Launch game",
+      "description": "Launch a game by its file path on the MiSTer.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "path": { "name": "Path", "description": "Absolute path of the game file." }
+      }
+    },
+    "launch_system": {
+      "name": "Launch system",
+      "description": "Launch a core/system by its ID.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "system_id": { "name": "System ID", "description": "System/core ID, e.g. SNES." }
+      }
+    },
+    "search_games": {
+      "name": "Search games",
+      "description": "Search indexed games and return the results.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "query": { "name": "Query", "description": "Search text." },
+        "system": { "name": "System", "description": "Restrict to a system ID (default: all)." }
+      }
+    },
+    "send_keyboard": {
+      "name": "Send keyboard",
+      "description": "Send a named keyboard key to the MiSTer.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "key": { "name": "Key", "description": "Key name, e.g. up, down, enter, escape." }
+      }
+    },
+    "take_screenshot": {
+      "name": "Take screenshot",
+      "description": "Trigger a screenshot capture on the MiSTer.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." }
+      }
+    }
+  }
+}

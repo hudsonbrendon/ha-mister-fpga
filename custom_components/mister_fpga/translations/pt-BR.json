@@ -1,0 +1,102 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MiSTer FPGA",
+        "description": "Conecte-se ao serviço Remote (mrext) rodando no seu MiSTer.",
+        "data": {
+          "name": "Nome",
+          "host": "Host ou endereço IP",
+          "port": "Porta"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Falha ao conectar. Verifique o IP e se o serviço Remote está rodando no MiSTer."
+    },
+    "abort": {
+      "already_configured": "Este MiSTer já está configurado."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opções do MiSTer FPGA",
+        "data": {
+          "scan_interval": "Intervalo de atualização (segundos)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "online": { "name": "Online" }
+    },
+    "sensor": {
+      "core": { "name": "Core" },
+      "system": { "name": "Sistema" },
+      "game": { "name": "Jogo" },
+      "version": { "name": "Versão" },
+      "hostname": { "name": "Hostname" },
+      "ip_address": { "name": "Endereço IP" }
+    },
+    "button": {
+      "reboot": { "name": "Reiniciar" },
+      "go_to_menu": { "name": "Ir para o menu" },
+      "take_screenshot": { "name": "Tirar screenshot" },
+      "restart_remote": { "name": "Reiniciar serviço Remote" },
+      "index_games": { "name": "Reindexar jogos" }
+    },
+    "select": {
+      "launch_system": { "name": "Iniciar sistema" }
+    },
+    "switch": {
+      "background_music": { "name": "Música de fundo" }
+    },
+    "image": {
+      "latest_screenshot": { "name": "Último screenshot" }
+    }
+  },
+  "services": {
+    "launch_game": {
+      "name": "Iniciar jogo",
+      "description": "Inicia um jogo pelo caminho do arquivo no MiSTer.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "path": { "name": "Caminho", "description": "Caminho absoluto do arquivo do jogo." }
+      }
+    },
+    "launch_system": {
+      "name": "Iniciar sistema",
+      "description": "Inicia um core/sistema pelo ID.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "system_id": { "name": "ID do sistema", "description": "ID do sistema/core, ex.: SNES." }
+      }
+    },
+    "search_games": {
+      "name": "Buscar jogos",
+      "description": "Busca jogos indexados e retorna os resultados.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "query": { "name": "Busca", "description": "Texto da busca." },
+        "system": { "name": "Sistema", "description": "Restringe a um ID de sistema (padrão: todos)." }
+      }
+    },
+    "send_keyboard": {
+      "name": "Enviar tecla",
+      "description": "Envia uma tecla nomeada para o MiSTer.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "key": { "name": "Tecla", "description": "Nome da tecla, ex.: up, down, enter, escape." }
+      }
+    },
+    "take_screenshot": {
+      "name": "Tirar screenshot",
+      "description": "Dispara a captura de um screenshot no MiSTer.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." }
+      }
+    }
+  }
+}

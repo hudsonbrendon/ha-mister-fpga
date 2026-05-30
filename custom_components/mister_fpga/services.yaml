@@ -1,0 +1,58 @@
+launch_game:
+  fields:
+    entry_id:
+      required: true
+      selector:
+        text:
+    path:
+      required: true
+      example: "/media/fat/games/SNES/Chrono Trigger.sfc"
+      selector:
+        text:
+
+launch_system:
+  fields:
+    entry_id:
+      required: true
+      selector:
+        text:
+    system_id:
+      required: true
+      example: "SNES"
+      selector:
+        text:
+
+search_games:
+  fields:
+    entry_id:
+      required: true
+      selector:
+        text:
+    query:
+      required: true
+      example: "chrono"
+      selector:
+        text:
+    system:
+      example: "SNES"
+      selector:
+        text:
+
+send_keyboard:
+  fields:
+    entry_id:
+      required: true
+      selector:
+        text:
+    key:
+      required: true
+      example: "up"
+      selector:
+        text:
+
+take_screenshot:
+  fields:
+    entry_id:
+      required: true
+      selector:
+        text:
