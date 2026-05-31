@@ -4,11 +4,14 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Any
 
+from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+from .const import CONF_SSH_PASSWORD, DOMAIN
 from .coordinator import MisterDataUpdateCoordinator
+
+TO_REDACT = {CONF_SSH_PASSWORD}
 
 
 async def async_get_config_entry_diagnostics(
@@ -18,8 +21,8 @@ async def async_get_config_entry_diagnostics(
     return {
         "entry": {
             "title": entry.title,
-            "data": dict(entry.data),
-            "options": dict(entry.options),
+            "data": async_redact_data(dict(entry.data), TO_REDACT),
+            "options": async_redact_data(dict(entry.options), TO_REDACT),
         },
         "status": asdict(coordinator.data) if coordinator.data else None,
         "systems_count": len(coordinator.systems),

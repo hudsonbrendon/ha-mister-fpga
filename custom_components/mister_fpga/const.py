@@ -45,7 +45,6 @@ PATH_LAUNCH = "/launch"
 PATH_LAUNCH_TOKEN = "/l"
 PATH_LAUNCH_NEW = "/launch/new"
 PATH_KEYBOARD_RAW = "/controls/keyboard-raw"
-PATH_GENERATE_MAC = "/settings/system/generate-mac"
 
 # WebSocket endpoint (mounted under /api on Remote v0.4)
 WS_PATH = "/api/ws"
