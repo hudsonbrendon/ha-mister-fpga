@@ -44,6 +44,8 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
         self.indexing: bool = False
         self.index_exists: bool = False
         self.websocket = None
+        self.ssh = None
+        self.ssh_data: dict = {}
 
     async def _async_update_data(self) -> MisterStatus:
         """Fetch status; an offline device is not a fatal error."""
@@ -66,7 +68,13 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
             self._last_game = current
         if data.online:
             await self.async_refresh_extras()
+            await self.async_refresh_ssh()
         return data
+
+    async def async_refresh_ssh(self) -> None:
+        if self.ssh is None:
+            return
+        self.ssh_data = await self.ssh.async_probe()
 
     async def _safe(self, coro, default):
         """Await coro, returning default on MisterConnectionError."""

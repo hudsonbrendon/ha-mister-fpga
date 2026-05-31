@@ -51,7 +51,12 @@
       "music_playlist": { "name": "Music playlist" },
       "peers": { "name": "Peers" },
       "screenshots": { "name": "Screenshots" },
-      "menu_position": { "name": "Menu position" }
+      "menu_position": { "name": "Menu position" },
+      "active_core": { "name": "Active core" },
+      "uptime": { "name": "Uptime" },
+      "cpu_load": { "name": "CPU load" },
+      "memory_used": { "name": "Memory used" },
+      "firmware_date": { "name": "Firmware date" }
     },
     "button": {
       "reboot": { "name": "Reboot" },

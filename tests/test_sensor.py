@@ -43,3 +43,18 @@ async def test_extras_sensors(hass, init_integration):
     assert hass.states.get("sensor.mister_fpga_peers").state == "1"
     assert hass.states.get("sensor.mister_fpga_screenshots").state == "3"
     assert hass.states.get("sensor.mister_fpga_menu_position").state == "_Console/SNES"
+
+
+async def test_ssh_sensors_present(hass, init_integration):
+    entry, coordinator = await init_integration()
+    coordinator.ssh_data = {
+        "active_core": "SNES",
+        "uptime_seconds": 3600,
+        "cpu_load_1m": 0.5,
+        "memory_used_percent": 42.0,
+    }
+    coordinator.async_set_updated_data(coordinator.data)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.mister_fpga_active_core").state == "SNES"
+    assert hass.states.get("sensor.mister_fpga_cpu_load").state == "0.5"
+    assert hass.states.get("sensor.mister_fpga_memory_used").state == "42.0"

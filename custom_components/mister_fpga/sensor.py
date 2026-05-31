@@ -32,6 +32,13 @@ class MisterSensorEntityDescription(SensorEntityDescription):
     ) = None
 
 
+def _ts_to_datetime(ts):
+    if not ts:
+        return None
+    import datetime as _dt
+    return _dt.datetime.fromtimestamp(ts, tz=_dt.UTC)
+
+
 def _disk_usage(status: MisterStatus) -> float | None:
     if not status.disk_total:
         return None
@@ -151,6 +158,43 @@ SENSORS: tuple[MisterSensorEntityDescription, ...] = (
         translation_key="menu_position",
         icon="mdi:menu",
         coordinator_fn=lambda c: c.menu_path,
+    ),
+    MisterSensorEntityDescription(
+        key="active_core",
+        translation_key="active_core",
+        icon="mdi:chip",
+        coordinator_fn=lambda c: c.ssh_data.get("active_core"),
+    ),
+    MisterSensorEntityDescription(
+        key="uptime",
+        translation_key="uptime",
+        icon="mdi:timer-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement="s",
+        coordinator_fn=lambda c: c.ssh_data.get("uptime_seconds"),
+    ),
+    MisterSensorEntityDescription(
+        key="cpu_load",
+        translation_key="cpu_load",
+        icon="mdi:cpu-32-bit",
+        state_class=SensorStateClass.MEASUREMENT,
+        coordinator_fn=lambda c: c.ssh_data.get("cpu_load_1m"),
+    ),
+    MisterSensorEntityDescription(
+        key="memory_used",
+        translation_key="memory_used",
+        icon="mdi:memory",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        coordinator_fn=lambda c: c.ssh_data.get("memory_used_percent"),
+    ),
+    MisterSensorEntityDescription(
+        key="firmware_date",
+        translation_key="firmware_date",
+        icon="mdi:chip",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=SensorDeviceClass.TIMESTAMP,
+        coordinator_fn=lambda c: _ts_to_datetime(c.ssh_data.get("firmware_timestamp")),
     ),
 )
 

@@ -12,8 +12,14 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api import MisterClient
 from .const import (
     CONF_SCAN_INTERVAL,
+    CONF_SSH_ENABLED,
+    CONF_SSH_PASSWORD,
+    CONF_SSH_PORT,
+    CONF_SSH_USERNAME,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_SSH_PORT,
+    DEFAULT_SSH_USERNAME,
     DOMAIN,
 )
 from .coordinator import MisterDataUpdateCoordinator
@@ -231,6 +237,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await coordinator.async_refresh_systems()
     await coordinator.async_refresh_scripts()
 
+    if entry.options.get(CONF_SSH_ENABLED) and entry.options.get(CONF_SSH_PASSWORD):
+        from .ssh import MisterSSH
+        coordinator.ssh = MisterSSH(
+            entry.data[CONF_HOST],
+            entry.options.get(CONF_SSH_PORT, DEFAULT_SSH_PORT),
+            entry.options.get(CONF_SSH_USERNAME, DEFAULT_SSH_USERNAME),
+            entry.options[CONF_SSH_PASSWORD],
+        )
+
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     _register_services(hass)
     websocket = MisterWebSocket(hass, coordinator)
@@ -246,6 +261,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = hass.data[DOMAIN].get(entry.entry_id)
     if coordinator is not None and getattr(coordinator, "websocket", None) is not None:
         await coordinator.websocket.stop()
+    if getattr(coordinator, "ssh", None) is not None:
+        await coordinator.ssh.async_close()
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)

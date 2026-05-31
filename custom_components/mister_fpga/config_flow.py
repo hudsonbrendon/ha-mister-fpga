@@ -82,11 +82,36 @@ class MisterOptionsFlow(OptionsFlow):
         current = self._entry.options.get(
             CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
         )
+        from .const import (
+            CONF_SSH_ENABLED,
+            CONF_SSH_PASSWORD,
+            CONF_SSH_PORT,
+            CONF_SSH_USERNAME,
+            DEFAULT_SSH_PORT,
+            DEFAULT_SSH_USERNAME,
+        )
+        opts = self._entry.options
         schema = vol.Schema(
             {
                 vol.Optional(CONF_SCAN_INTERVAL, default=current): vol.All(
                     int, vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)
-                )
+                ),
+                vol.Optional(
+                    CONF_SSH_ENABLED,
+                    default=opts.get(CONF_SSH_ENABLED, False),
+                ): bool,
+                vol.Optional(
+                    CONF_SSH_USERNAME,
+                    default=opts.get(CONF_SSH_USERNAME, DEFAULT_SSH_USERNAME),
+                ): str,
+                vol.Optional(
+                    CONF_SSH_PASSWORD,
+                    default=opts.get(CONF_SSH_PASSWORD, ""),
+                ): str,
+                vol.Optional(
+                    CONF_SSH_PORT,
+                    default=opts.get(CONF_SSH_PORT, DEFAULT_SSH_PORT),
+                ): int,
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema)

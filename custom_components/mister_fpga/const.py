@@ -53,6 +53,21 @@ WS_PATH = "/api/ws"
 # MiSTer.ini keys exposed as Number entities (value range 0-100)
 INI_VIDEO_KEYS = ("video_brightness", "video_contrast", "video_saturation")
 
+CONF_SSH_ENABLED = "ssh_enabled"
+CONF_SSH_USERNAME = "ssh_username"
+CONF_SSH_PASSWORD = "ssh_password"
+CONF_SSH_PORT = "ssh_port"
+DEFAULT_SSH_USERNAME = "root"
+DEFAULT_SSH_PORT = 22
+
+SSH_PROBE_CMD = (
+    "cat /tmp/CORENAME 2>/dev/null; echo '|||'; "
+    "cat /proc/uptime 2>/dev/null; echo '|||'; "
+    "cat /proc/loadavg 2>/dev/null; echo '|||'; "
+    "awk '/MemTotal|MemAvailable/{print $2}' /proc/meminfo 2>/dev/null; echo '|||'; "
+    "stat -c %Y /media/fat/MiSTer 2>/dev/null"
+)
+
 # Keyboard control names accepted by POST /controls/keyboard/{name}
 KEYBOARD_NAMES = (
     "up", "down", "left", "right", "confirm", "back", "cancel", "menu",

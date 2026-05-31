@@ -1,3 +1,4 @@
 pytest-homeassistant-custom-component==0.13.205
 aioresponses
 ruff
+asyncssh==2.23.0
