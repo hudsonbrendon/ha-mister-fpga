@@ -148,6 +148,73 @@
       "fields": {
         "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." }
       }
+    },
+    "run_script": {
+      "name": "Executar script",
+      "description": "Executa um script da pasta Scripts do MiSTer.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "filename": { "name": "Arquivo", "description": "Nome do script, ex.: update_all.sh." }
+      }
+    },
+    "launch": {
+      "name": "Iniciar",
+      "description": "Inicia qualquer jogo, core, .mra ou .mgl pelo caminho absoluto.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "path": { "name": "Caminho", "description": "Caminho absoluto do arquivo." }
+      }
+    },
+    "launch_token": {
+      "name": "Iniciar token",
+      "description": "Inicia dados de token em base64url (formato NFC/QR).",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "data": { "name": "Dados", "description": "Dados de launch em base64url." }
+      }
+    },
+    "set_ini_value": {
+      "name": "Definir valor do INI",
+      "description": "Define uma chave no MiSTer.ini ativo.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "key": { "name": "Chave", "description": "Chave do MiSTer.ini, ex.: vga_scaler." },
+        "value": { "name": "Valor", "description": "Valor a definir (string vazia remove a chave)." }
+      }
+    },
+    "set_wallpaper": {
+      "name": "Definir wallpaper",
+      "description": "Define o wallpaper ativo do menu pelo nome do arquivo.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "filename": { "name": "Arquivo", "description": "Nome do arquivo de wallpaper." }
+      }
+    },
+    "set_background_mode": {
+      "name": "Definir modo de fundo",
+      "description": "Define o modo de fundo do menu (0-7).",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "mode": { "name": "Modo", "description": "Modo de fundo 0-7." }
+      }
+    },
+    "send_keyboard_raw": {
+      "name": "Enviar tecla bruta",
+      "description": "Envia um código uinput de teclado bruto ao MiSTer.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "code": { "name": "Código", "description": "Código uinput da tecla (0-255)." }
+      }
+    },
+    "create_shortcut": {
+      "name": "Criar atalho",
+      "description": "Cria um atalho .mgl para um jogo e retorna o caminho.",
+      "fields": {
+        "entry_id": { "name": "ID da entrada", "description": "ID da config entry do MiSTer alvo." },
+        "game_path": { "name": "Caminho do jogo", "description": "Caminho absoluto do arquivo do jogo." },
+        "folder": { "name": "Pasta", "description": "Pasta de menu destino (ex.: _@Favorites)." },
+        "name": { "name": "Nome", "description": "Nome do atalho (sem extensão)." }
+      }
     }
   }
 }

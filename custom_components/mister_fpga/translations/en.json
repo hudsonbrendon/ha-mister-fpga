@@ -148,6 +148,73 @@
       "fields": {
         "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." }
       }
+    },
+    "run_script": {
+      "name": "Run script",
+      "description": "Launch a script from the MiSTer Scripts folder.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "filename": { "name": "Filename", "description": "Script filename, e.g. update_all.sh." }
+      }
+    },
+    "launch": {
+      "name": "Launch",
+      "description": "Launch any game, core, .mra or .mgl by absolute path.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "path": { "name": "Path", "description": "Absolute path to the file to launch." }
+      }
+    },
+    "launch_token": {
+      "name": "Launch token",
+      "description": "Launch base64url-encoded token data (NFC/QR format).",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "data": { "name": "Data", "description": "base64url-encoded launch data." }
+      }
+    },
+    "set_ini_value": {
+      "name": "Set INI value",
+      "description": "Set a key in the active MiSTer.ini file.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "key": { "name": "Key", "description": "MiSTer.ini key, e.g. vga_scaler." },
+        "value": { "name": "Value", "description": "Value to set (empty string removes the key)." }
+      }
+    },
+    "set_wallpaper": {
+      "name": "Set wallpaper",
+      "description": "Set the active menu wallpaper by filename.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "filename": { "name": "Filename", "description": "Wallpaper filename." }
+      }
+    },
+    "set_background_mode": {
+      "name": "Set background mode",
+      "description": "Set the menu background mode (0-7).",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "mode": { "name": "Mode", "description": "Background mode 0-7." }
+      }
+    },
+    "send_keyboard_raw": {
+      "name": "Send raw keyboard",
+      "description": "Send a raw uinput keyboard code to the MiSTer.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "code": { "name": "Code", "description": "uinput key code (0-255)." }
+      }
+    },
+    "create_shortcut": {
+      "name": "Create shortcut",
+      "description": "Create an .mgl shortcut for a game and return its path.",
+      "fields": {
+        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
+        "game_path": { "name": "Game path", "description": "Absolute path to the game file." },
+        "folder": { "name": "Folder", "description": "Destination menu folder (e.g. _@Favorites)." },
+        "name": { "name": "Name", "description": "Shortcut name (without extension)." }
+      }
     }
   }
 }
