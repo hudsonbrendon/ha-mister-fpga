@@ -31,6 +31,19 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
         self.client = client
         self.systems: list[dict] = []
         self._last_game: str | None = None
+        self.scripts: list[dict] = []
+        self.music: dict = {}
+        self.wallpapers: dict = {}
+        self.inis: list[dict] = []
+        self.active_ini_id: int = 1
+        self.ini_values: dict = {}
+        self.mac_address: str | None = None
+        self.peers: list[dict] = []
+        self.screenshots_count: int = 0
+        self.menu_path: str | None = None
+        self.indexing: bool = False
+        self.index_exists: bool = False
+        self.websocket = None
 
     async def _async_update_data(self) -> MisterStatus:
         """Fetch status; an offline device is not a fatal error."""
@@ -51,7 +64,42 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
                 },
             )
             self._last_game = current
+        if data.online:
+            await self.async_refresh_extras()
         return data
+
+    async def _safe(self, coro, default):
+        """Await coro, returning default on MisterConnectionError."""
+        try:
+            return await coro
+        except MisterConnectionError as err:
+            _LOGGER.debug("MiSTer extra fetch failed: %s", err)
+            return default
+
+    async def async_refresh_extras(self) -> None:
+        """Best-effort refresh of secondary state; never raises."""
+        music = await self._safe(self.client.async_get_music_status(), {})
+        self.music = music if isinstance(music, dict) else {}
+        wallpapers = await self._safe(self.client.async_get_wallpapers(), {})
+        self.wallpapers = wallpapers if isinstance(wallpapers, dict) else {}
+        inis = await self._safe(self.client.async_get_inis(), {})
+        self.inis = inis.get("inis", []) if isinstance(inis, dict) else []
+        active = inis.get("active", 0) if isinstance(inis, dict) else 0
+        self.active_ini_id = active if active else 1
+        ini_vals = await self._safe(
+            self.client.async_get_ini_values(self.active_ini_id), {}
+        )
+        self.ini_values = ini_vals if isinstance(ini_vals, dict) else {}
+        self.mac_address = self.ini_values.get("__ethernetMacAddress") or None
+        peers = await self._safe(self.client.async_get_peers(), [])
+        self.peers = peers if isinstance(peers, list) else []
+        shots = await self._safe(self.client.async_get_screenshots(), [])
+        self.screenshots_count = len(shots) if isinstance(shots, list) else 0
+
+    async def async_refresh_scripts(self) -> None:
+        """Refresh the Scripts list (best-effort)."""
+        data = await self._safe(self.client.async_get_scripts(), {})
+        self.scripts = data.get("scripts", []) if isinstance(data, dict) else []
 
     async def async_refresh_systems(self) -> None:
         """Refresh the systems list (best-effort; errors are swallowed)."""

@@ -97,6 +97,24 @@ def init_integration(hass, make_status):
         ), patch(
             "custom_components.mister_fpga.api.MisterClient.async_get_music_status",
             new=AsyncMock(return_value={"playing": False}),
+        ), patch(
+            "custom_components.mister_fpga.api.MisterClient.async_get_wallpapers",
+            new=AsyncMock(return_value={}),
+        ), patch(
+            "custom_components.mister_fpga.api.MisterClient.async_get_inis",
+            new=AsyncMock(return_value={"active": 0, "inis": []}),
+        ), patch(
+            "custom_components.mister_fpga.api.MisterClient.async_get_ini_values",
+            new=AsyncMock(return_value={}),
+        ), patch(
+            "custom_components.mister_fpga.api.MisterClient.async_get_peers",
+            new=AsyncMock(return_value=[]),
+        ), patch(
+            "custom_components.mister_fpga.api.MisterClient.async_get_screenshots",
+            new=AsyncMock(return_value=[]),
+        ), patch(
+            "custom_components.mister_fpga.api.MisterClient.async_get_scripts",
+            new=AsyncMock(return_value={"scripts": []}),
         ):
             await hass.config_entries.async_setup(entry.entry_id)
             await hass.async_block_till_done()
