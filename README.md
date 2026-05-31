@@ -58,6 +58,20 @@ buttons, video adjustments, and more.
   network.
 - **Localized** — UI and entities translated to English and Portugues (Brasil).
 
+## Architecture
+
+All device communication — REST calls, WebSocket subscription, and SSH telemetry — is
+handled by the standalone Python library
+[**python-mister-fpga**](https://github.com/hudsonbrendon/python-mister-fpga)
+([PyPI](https://pypi.org/project/python-mister-fpga/)), which this integration declares
+as a runtime dependency (`python-mister-fpga==0.1.0`).
+
+The library can be installed and used independently of Home Assistant, making it easy to
+script or automate your MiSTer from any Python project. The integration itself focuses
+exclusively on the Home Assistant layer: the config flow, data update coordinator,
+entities, services, and the WebSocket adapter that bridges mrext events to HA state
+changes.
+
 ## Requirements
 
 **On the MiSTer:**
