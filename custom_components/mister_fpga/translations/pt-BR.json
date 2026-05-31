@@ -36,9 +36,19 @@
       "core": { "name": "Core" },
       "system": { "name": "Sistema" },
       "game": { "name": "Jogo" },
-      "version": { "name": "Versão" },
+      "remote_version": { "name": "Versão do Remote" },
       "hostname": { "name": "Hostname" },
-      "ip_address": { "name": "Endereço IP" }
+      "ip_address": { "name": "Endereço IP" },
+      "dns_name": { "name": "Nome DNS" },
+      "disk_free": { "name": "Espaço livre" },
+      "disk_usage": { "name": "Uso do disco" },
+      "last_updated": { "name": "Última atualização" },
+      "mac_address": { "name": "Endereço MAC" },
+      "music_track": { "name": "Faixa de música" },
+      "music_playlist": { "name": "Playlist" },
+      "peers": { "name": "Peers" },
+      "screenshots": { "name": "Screenshots" },
+      "menu_position": { "name": "Posição no menu" }
     },
     "button": {
       "reboot": { "name": "Reiniciar" },
