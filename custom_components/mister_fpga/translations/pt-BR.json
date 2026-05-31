@@ -61,7 +61,13 @@
       "index_games": { "name": "Reindexar jogos" }
     },
     "select": {
-      "launch_system": { "name": "Iniciar sistema" }
+      "launch_system": { "name": "Iniciar sistema" },
+      "active_ini": { "name": "INI ativo" },
+      "background_mode": { "name": "Modo de fundo" },
+      "wallpaper": { "name": "Wallpaper" },
+      "music_playlist": { "name": "Playlist" },
+      "music_playback": { "name": "Modo de reprodução" },
+      "run_script": { "name": "Executar script" }
     },
     "switch": {
       "background_music": { "name": "Música de fundo" }

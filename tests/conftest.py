@@ -125,6 +125,9 @@ def init_integration(hass, make_status):
         ), patch(
             "custom_components.mister_fpga.api.MisterClient.async_get_scripts",
             new=AsyncMock(return_value={"scripts": []}),
+        ), patch(
+            "custom_components.mister_fpga.api.MisterClient.async_get_music_playlists",
+            new=AsyncMock(return_value=[]),
         ):
             await hass.config_entries.async_setup(entry.entry_id)
             await hass.async_block_till_done()

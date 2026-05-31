@@ -61,7 +61,13 @@
       "index_games": { "name": "Index Games" }
     },
     "select": {
-      "launch_system": { "name": "Launch system" }
+      "launch_system": { "name": "Launch system" },
+      "active_ini": { "name": "Active INI" },
+      "background_mode": { "name": "Background mode" },
+      "wallpaper": { "name": "Wallpaper" },
+      "music_playlist": { "name": "Music playlist" },
+      "music_playback": { "name": "Music playback" },
+      "run_script": { "name": "Run script" }
     },
     "switch": {
       "background_music": { "name": "Background music" }
