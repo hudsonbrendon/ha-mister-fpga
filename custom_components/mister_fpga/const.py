@@ -5,6 +5,8 @@ from __future__ import annotations
 # their existing `from .const import ...` imports unchanged.
 from mister_fpga import (  # noqa: F401
     DEFAULT_PORT,
+    DEFAULT_SSH_PORT,
+    DEFAULT_SSH_USERNAME,
     INI_VIDEO_KEYS,
     KEYBOARD_NAMES,
     WS_PATH,
@@ -25,5 +27,3 @@ CONF_SSH_ENABLED = "ssh_enabled"
 CONF_SSH_USERNAME = "ssh_username"
 CONF_SSH_PASSWORD = "ssh_password"
 CONF_SSH_PORT = "ssh_port"
-DEFAULT_SSH_USERNAME = "root"
-DEFAULT_SSH_PORT = 22
