@@ -101,6 +101,11 @@
     },
     "image": {
       "latest_screenshot": { "name": "Último screenshot" }
+    },
+    "number": {
+      "video_brightness": {"name": "Brilho"},
+      "video_contrast": {"name": "Contraste"},
+      "video_saturation": {"name": "Saturação"}
     }
   },
   "services": {
