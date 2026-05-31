@@ -53,6 +53,42 @@ SERVICE_SEND_KEYBOARD_SCHEMA = vol.Schema(
 SERVICE_TAKE_SCREENSHOT_SCHEMA = vol.Schema(
     {vol.Required(ATTR_ENTRY_ID): cv.string}
 )
+SERVICE_RUN_SCRIPT_SCHEMA = vol.Schema(
+    {vol.Required(ATTR_ENTRY_ID): cv.string, vol.Required("filename"): cv.string}
+)
+SERVICE_LAUNCH_SCHEMA = vol.Schema(
+    {vol.Required(ATTR_ENTRY_ID): cv.string, vol.Required("path"): cv.string}
+)
+SERVICE_LAUNCH_TOKEN_SCHEMA = vol.Schema(
+    {vol.Required(ATTR_ENTRY_ID): cv.string, vol.Required("data"): cv.string}
+)
+SERVICE_SET_INI_VALUE_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_ENTRY_ID): cv.string,
+        vol.Required("key"): cv.string,
+        vol.Required("value"): cv.string,
+    }
+)
+SERVICE_SET_WALLPAPER_SCHEMA = vol.Schema(
+    {vol.Required(ATTR_ENTRY_ID): cv.string, vol.Required("filename"): cv.string}
+)
+SERVICE_BACKGROUND_MODE_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_ENTRY_ID): cv.string,
+        vol.Required("mode"): vol.All(int, vol.Range(min=0, max=7)),
+    }
+)
+SERVICE_KEYBOARD_RAW_SCHEMA = vol.Schema(
+    {vol.Required(ATTR_ENTRY_ID): cv.string, vol.Required("code"): int}
+)
+SERVICE_CREATE_SHORTCUT_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_ENTRY_ID): cv.string,
+        vol.Required("game_path"): cv.string,
+        vol.Required("folder"): cv.string,
+        vol.Required("name"): cv.string,
+    }
+)
 
 
 def _register_services(hass: HomeAssistant) -> None:
@@ -91,6 +127,46 @@ def _register_services(hass: HomeAssistant) -> None:
         coord = _coordinator(call)
         await coord.client.async_take_screenshot()
 
+    async def _run_script(call: ServiceCall) -> None:
+        coord = _coordinator(call)
+        await coord.client.async_launch_script(call.data["filename"])
+
+    async def _launch(call: ServiceCall) -> None:
+        coord = _coordinator(call)
+        await coord.client.async_launch_path(call.data["path"])
+        await coord.async_request_refresh()
+
+    async def _launch_token(call: ServiceCall) -> None:
+        coord = _coordinator(call)
+        await coord.client.async_launch_token(call.data["data"])
+        await coord.async_request_refresh()
+
+    async def _set_ini_value(call: ServiceCall) -> None:
+        coord = _coordinator(call)
+        await coord.client.async_set_ini_values(
+            coord.active_ini_id, {call.data["key"]: call.data["value"]}
+        )
+
+    async def _set_wallpaper(call: ServiceCall) -> None:
+        coord = _coordinator(call)
+        await coord.client.async_set_wallpaper(call.data["filename"])
+        await coord.async_request_refresh()
+
+    async def _set_background_mode(call: ServiceCall) -> None:
+        coord = _coordinator(call)
+        await coord.client.async_set_background_mode(call.data["mode"])
+        await coord.async_request_refresh()
+
+    async def _send_keyboard_raw(call: ServiceCall) -> None:
+        coord = _coordinator(call)
+        await coord.client.async_send_keyboard_raw(call.data["code"])
+
+    async def _create_shortcut(call: ServiceCall) -> dict:
+        coord = _coordinator(call)
+        return await coord.client.async_create_shortcut(
+            call.data["game_path"], call.data["folder"], call.data["name"]
+        )
+
     hass.services.async_register(
         DOMAIN, "launch_game", _launch_game, SERVICE_LAUNCH_GAME_SCHEMA
     )
@@ -109,6 +185,35 @@ def _register_services(hass: HomeAssistant) -> None:
     )
     hass.services.async_register(
         DOMAIN, "take_screenshot", _take_screenshot, SERVICE_TAKE_SCREENSHOT_SCHEMA
+    )
+    hass.services.async_register(
+        DOMAIN, "run_script", _run_script, SERVICE_RUN_SCRIPT_SCHEMA
+    )
+    hass.services.async_register(DOMAIN, "launch", _launch, SERVICE_LAUNCH_SCHEMA)
+    hass.services.async_register(
+        DOMAIN, "launch_token", _launch_token, SERVICE_LAUNCH_TOKEN_SCHEMA
+    )
+    hass.services.async_register(
+        DOMAIN, "set_ini_value", _set_ini_value, SERVICE_SET_INI_VALUE_SCHEMA
+    )
+    hass.services.async_register(
+        DOMAIN, "set_wallpaper", _set_wallpaper, SERVICE_SET_WALLPAPER_SCHEMA
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "set_background_mode",
+        _set_background_mode,
+        SERVICE_BACKGROUND_MODE_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN, "send_keyboard_raw", _send_keyboard_raw, SERVICE_KEYBOARD_RAW_SCHEMA
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "create_shortcut",
+        _create_shortcut,
+        SERVICE_CREATE_SHORTCUT_SCHEMA,
+        supports_response=SupportsResponse.ONLY,
     )
 
 

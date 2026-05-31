@@ -56,3 +56,46 @@ take_screenshot:
       required: true
       selector:
         text:
+
+run_script:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    filename: {required: true, example: "update_all.sh", selector: {text: {}}}
+
+launch:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    path: {required: true, example: "/media/fat/menu.rbf", selector: {text: {}}}
+
+launch_token:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    data: {required: true, example: "bWVudS5yYmY=", selector: {text: {}}}
+
+set_ini_value:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    key: {required: true, example: "vga_scaler", selector: {text: {}}}
+    value: {required: true, example: "1", selector: {text: {}}}
+
+set_wallpaper:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    filename: {required: true, example: "snatcher.png", selector: {text: {}}}
+
+set_background_mode:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    mode: {required: true, selector: {number: {min: 0, max: 7, mode: box}}}
+
+send_keyboard_raw:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    code: {required: true, example: 28, selector: {number: {min: 0, max: 255, mode: box}}}
+
+create_shortcut:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    game_path: {required: true, selector: {text: {}}}
+    folder: {required: true, example: "_@Favorites", selector: {text: {}}}
+    name: {required: true, selector: {text: {}}}
