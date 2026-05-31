@@ -52,6 +52,16 @@ async def test_get_status_merges_endpoints(client):
                 "hostname": "MiSTer",
                 "version": "240101",
                 "updated": "2026-05-30",
+                "dns": "MiSTer.local",
+                "disks": [
+                    {
+                        "path": "/media/fat",
+                        "total": 100,
+                        "used": 75,
+                        "free": 25,
+                        "displayName": "SD card",
+                    }
+                ],
             },
         )
         m.get(
@@ -72,6 +82,10 @@ async def test_get_status_merges_endpoints(client):
     assert status.version == "240101"
     assert status.hostname == "MiSTer"
     assert status.ip == "192.168.31.77"
+    assert status.dns == "MiSTer.local"
+    assert status.disk_total == 100
+    assert status.disk_used == 75
+    assert status.disk_free == 25
 
 
 async def test_get_status_raises_on_error(client):
@@ -176,3 +190,150 @@ async def test_get_screenshots(client):
         screenshots = await client.async_get_screenshots()
     assert isinstance(screenshots, list)
     assert screenshots[0]["filename"] == "a.png"
+
+
+async def test_get_wallpapers(client):
+    with aioresponses() as m:
+        m.get(
+            f"{BASE}/wallpapers",
+            payload={
+                "active": "snatcher.png",
+                "backgroundMode": 2,
+                "wallpapers": [
+                    {"name": "snatcher", "filename": "snatcher.png", "active": True}
+                ],
+            },
+        )
+        wp = await client.async_get_wallpapers()
+    assert wp["active"] == "snatcher.png"
+    assert wp["backgroundMode"] == 2
+
+
+async def test_set_and_clear_wallpaper(client):
+    with aioresponses() as m:
+        m.post(f"{BASE}/wallpapers/snatcher.png", status=200)
+        m.delete(f"{BASE}/wallpapers", status=200)
+        await client.async_set_wallpaper("snatcher.png")
+        await client.async_clear_wallpaper()
+
+
+async def test_inis_get_set_active(client):
+    import yarl
+
+    with aioresponses() as m:
+        m.get(
+            f"{BASE}/settings/inis",
+            payload={
+                "active": 0,
+                "inis": [
+                    {
+                        "id": 1,
+                        "displayName": "Main",
+                        "filename": "MiSTer.ini",
+                        "path": "/x",
+                    }
+                ],
+            },
+        )
+        m.get(
+            f"{BASE}/settings/inis/1",
+            payload={"__hostname": "MiSTer", "video_brightness": "50"},
+        )
+        m.put(f"{BASE}/settings/inis", status=200)
+        m.put(f"{BASE}/settings/inis/1", status=200)
+        inis = await client.async_get_inis()
+        values = await client.async_get_ini_values(1)
+        await client.async_set_active_ini(1)
+        await client.async_set_ini_values(1, {"video_brightness": "60"})
+        put_inis_calls = m.requests[
+            ("PUT", yarl.URL(f"{BASE}/settings/inis"))
+        ]
+        put_inis_1_calls = m.requests[
+            ("PUT", yarl.URL(f"{BASE}/settings/inis/1"))
+        ]
+    assert inis["inis"][0]["displayName"] == "Main"
+    assert values["video_brightness"] == "50"
+    assert put_inis_calls[0].kwargs["json"] == {"ini": 1}
+    assert put_inis_1_calls[0].kwargs["json"] == {"video_brightness": "60"}
+
+
+async def test_set_background_mode(client):
+    import yarl
+
+    with aioresponses() as m:
+        m.put(f"{BASE}/settings/core/menu", status=200)
+        await client.async_set_background_mode(3)
+        put_calls = m.requests[("PUT", yarl.URL(f"{BASE}/settings/core/menu"))]
+    assert put_calls[0].kwargs["json"] == {"mode": 3}
+
+
+async def test_music_playlists_and_playback(client):
+    with aioresponses() as m:
+        m.get(f"{BASE}/music/playlist", payload=["none", "Vidya"])
+        m.post(f"{BASE}/music/playlist/Vidya", status=200)
+        m.post(f"{BASE}/music/playback/loop", status=200)
+        pls = await client.async_get_music_playlists()
+        await client.async_set_music_playlist("Vidya")
+        await client.async_set_music_playback("loop")
+    assert pls == ["none", "Vidya"]
+
+
+async def test_scripts_list_launch_kill_console(client):
+    with aioresponses() as m:
+        m.get(
+            f"{BASE}/scripts/list",
+            payload={
+                "canLaunch": True,
+                "scripts": [
+                    {"name": "update_all", "filename": "update_all.sh", "path": "/x"}
+                ],
+            },
+        )
+        m.post(f"{BASE}/scripts/launch/update_all.sh", status=200)
+        m.post(f"{BASE}/scripts/console", status=200)
+        m.post(f"{BASE}/scripts/kill", status=200)
+        scr = await client.async_get_scripts()
+        await client.async_launch_script("update_all.sh")
+        await client.async_open_console()
+        await client.async_kill_script()
+    assert scr["scripts"][0]["filename"] == "update_all.sh"
+
+
+async def test_peers(client):
+    with aioresponses() as m:
+        m.get(
+            f"{BASE}/settings/remote/peers",
+            payload={
+                "peers": [
+                    {"hostname": "MiSTer.local", "version": "0.4", "ip": "1.2.3.4"}
+                ]
+            },
+        )
+        peers = await client.async_get_peers()
+    assert peers[0]["ip"] == "1.2.3.4"
+
+
+async def test_generic_launch_and_token(client):
+    with aioresponses() as m:
+        m.post(f"{BASE}/launch", status=200)
+        m.get(f"{BASE}/l/bWVudS5yYmY=", status=200)
+        await client.async_launch_path("/media/fat/menu.rbf")
+        await client.async_launch_token("bWVudS5yYmY=")
+
+
+async def test_create_shortcut(client):
+    with aioresponses() as m:
+        m.post(
+            f"{BASE}/launch/new",
+            payload={"path": "/media/fat/_@Favorites/Crash.mgl"},
+        )
+        result = await client.async_create_shortcut(
+            "/g/Crash.chd", "_@Favorites", "Crash"
+        )
+    assert result["path"].endswith("Crash.mgl")
+
+
+async def test_send_keyboard_raw(client):
+    with aioresponses() as m:
+        m.post(f"{BASE}/controls/keyboard-raw/16", status=200)
+        await client.async_send_keyboard_raw(16)
