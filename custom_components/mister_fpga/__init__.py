@@ -17,17 +17,19 @@ from .const import (
     DOMAIN,
 )
 from .coordinator import MisterDataUpdateCoordinator
+from .websocket import MisterWebSocket
 
 # Platforms are appended incrementally as each platform module is implemented
 # (binary_sensor, sensor, media_player, button, select, switch, image).
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
-    Platform.SENSOR,
-    Platform.MEDIA_PLAYER,
     Platform.BUTTON,
-    Platform.SELECT,
-    Platform.SWITCH,
     Platform.IMAGE,
+    Platform.MEDIA_PLAYER,
+    Platform.NUMBER,
+    Platform.SELECT,
+    Platform.SENSOR,
+    Platform.SWITCH,
 ]
 
 ATTR_ENTRY_ID = "entry_id"
@@ -122,9 +124,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = MisterDataUpdateCoordinator(hass, client, scan_interval)
     await coordinator.async_config_entry_first_refresh()
     await coordinator.async_refresh_systems()
+    await coordinator.async_refresh_scripts()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     _register_services(hass)
+    websocket = MisterWebSocket(hass, coordinator)
+    websocket.start()
+    coordinator.websocket = websocket
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
@@ -132,6 +138,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    coordinator = hass.data[DOMAIN].get(entry.entry_id)
+    if coordinator is not None and getattr(coordinator, "websocket", None) is not None:
+        await coordinator.websocket.stop()
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)

@@ -38,6 +38,16 @@ def mock_clientsession():
 
 
 @pytest.fixture(autouse=True)
+def mock_websocket():
+    """Prevent the real WebSocket background task from starting in tests."""
+    with patch("custom_components.mister_fpga.MisterWebSocket") as ws_cls:
+        instance = ws_cls.return_value
+        instance.start = MagicMock()
+        instance.stop = AsyncMock()
+        yield ws_cls
+
+
+@pytest.fixture(autouse=True)
 def mock_refresh_systems():
     """Stop setup from making a real /systems call; tests set systems manually."""
     target = (
