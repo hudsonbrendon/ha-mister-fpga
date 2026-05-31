@@ -19,7 +19,14 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([MisterConnectivitySensor(coordinator, entry)])
+    async_add_entities(
+        [
+            MisterConnectivitySensor(coordinator, entry),
+            MisterGameRunningSensor(coordinator, entry),
+            MisterBgmActiveSensor(coordinator, entry),
+            MisterIndexingSensor(coordinator, entry),
+        ]
+    )
 
 
 class MisterConnectivitySensor(MisterEntity, BinarySensorEntity):
@@ -35,3 +42,43 @@ class MisterConnectivitySensor(MisterEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         return bool(self.coordinator.data and self.coordinator.data.online)
+
+
+class MisterGameRunningSensor(MisterEntity, BinarySensorEntity):
+    _attr_translation_key = "game_running"
+    _attr_device_class = BinarySensorDeviceClass.RUNNING
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = f"{entry.entry_id}_game_running"
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.coordinator.data and self.coordinator.data.is_running_game)
+
+
+class MisterBgmActiveSensor(MisterEntity, BinarySensorEntity):
+    _attr_translation_key = "background_music_active"
+    _attr_icon = "mdi:music-circle"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = f"{entry.entry_id}_background_music_active"
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.coordinator.music.get("running"))
+
+
+class MisterIndexingSensor(MisterEntity, BinarySensorEntity):
+    _attr_translation_key = "indexing"
+    _attr_device_class = BinarySensorDeviceClass.RUNNING
+    _attr_icon = "mdi:database-search"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = f"{entry.entry_id}_indexing"
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.coordinator.indexing)

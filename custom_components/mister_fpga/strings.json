@@ -30,7 +30,10 @@
   },
   "entity": {
     "binary_sensor": {
-      "online": { "name": "Online" }
+      "online": { "name": "Online" },
+      "game_running": { "name": "Game running" },
+      "background_music_active": { "name": "Background music active" },
+      "indexing": { "name": "Indexing" }
     },
     "sensor": {
       "core": { "name": "Core" },
