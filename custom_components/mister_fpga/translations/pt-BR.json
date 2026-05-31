@@ -23,7 +23,11 @@
       "init": {
         "title": "Opções do MiSTer FPGA",
         "data": {
-          "scan_interval": "Intervalo de atualização (segundos)"
+          "scan_interval": "Intervalo de atualização (segundos)",
+          "ssh_enabled": "Ativar telemetria SSH",
+          "ssh_username": "Usuário SSH",
+          "ssh_password": "Senha SSH",
+          "ssh_port": "Porta SSH"
         }
       }
     }

@@ -8,3 +8,4 @@ venv/
 .coverage
 htmlcov/
 .DS_Store
+docs/superpowers/

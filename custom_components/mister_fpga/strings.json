@@ -23,7 +23,11 @@
       "init": {
         "title": "MiSTer FPGA options",
         "data": {
-          "scan_interval": "Scan interval (seconds)"
+          "scan_interval": "Scan interval (seconds)",
+          "ssh_enabled": "Enable SSH telemetry",
+          "ssh_username": "SSH username",
+          "ssh_password": "SSH password",
+          "ssh_port": "SSH port"
         }
       }
     }

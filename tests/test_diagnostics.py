@@ -12,3 +12,5 @@ async def test_diagnostics(hass, init_integration):
     assert diag["status"]["online"] is True
     assert diag["status"]["core"] == "SNES"
     assert diag["entry"]["data"]["host"] == "192.168.31.77"
+    assert diag["extras"]["screenshots"] == 0
+    assert diag["ssh_enabled"] is False
