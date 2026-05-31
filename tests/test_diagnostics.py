@@ -19,9 +19,9 @@ async def test_diagnostics(hass, init_integration):
 async def test_diagnostics_redacts_ssh_password(hass):
     from unittest.mock import AsyncMock, patch
 
+    from mister_fpga import MisterStatus
     from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-    from custom_components.mister_fpga.api import MisterStatus
     from custom_components.mister_fpga.const import DOMAIN
     from custom_components.mister_fpga.diagnostics import (
         async_get_config_entry_diagnostics,
@@ -41,39 +41,39 @@ async def test_diagnostics_redacts_ssh_password(hass):
     entry.add_to_hass(hass)
     with (
         patch(
-            "custom_components.mister_fpga.api.MisterClient.async_get_status",
+            "mister_fpga.client.MisterClient.async_get_status",
             new=AsyncMock(return_value=MisterStatus(online=True)),
         ),
         patch(
-            "custom_components.mister_fpga.api.MisterClient.async_get_music_status",
+            "mister_fpga.client.MisterClient.async_get_music_status",
             new=AsyncMock(return_value={"playing": False}),
         ),
         patch(
-            "custom_components.mister_fpga.api.MisterClient.async_get_wallpapers",
+            "mister_fpga.client.MisterClient.async_get_wallpapers",
             new=AsyncMock(return_value={}),
         ),
         patch(
-            "custom_components.mister_fpga.api.MisterClient.async_get_inis",
+            "mister_fpga.client.MisterClient.async_get_inis",
             new=AsyncMock(return_value={"active": 0, "inis": []}),
         ),
         patch(
-            "custom_components.mister_fpga.api.MisterClient.async_get_ini_values",
+            "mister_fpga.client.MisterClient.async_get_ini_values",
             new=AsyncMock(return_value={}),
         ),
         patch(
-            "custom_components.mister_fpga.api.MisterClient.async_get_peers",
+            "mister_fpga.client.MisterClient.async_get_peers",
             new=AsyncMock(return_value=[]),
         ),
         patch(
-            "custom_components.mister_fpga.api.MisterClient.async_get_screenshots",
+            "mister_fpga.client.MisterClient.async_get_screenshots",
             new=AsyncMock(return_value=[]),
         ),
         patch(
-            "custom_components.mister_fpga.api.MisterClient.async_get_scripts",
+            "mister_fpga.client.MisterClient.async_get_scripts",
             new=AsyncMock(return_value={"scripts": []}),
         ),
         patch(
-            "custom_components.mister_fpga.api.MisterClient.async_get_music_playlists",
+            "mister_fpga.client.MisterClient.async_get_music_playlists",
             new=AsyncMock(return_value=[]),
         ),
         patch(

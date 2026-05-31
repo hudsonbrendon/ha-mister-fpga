@@ -9,7 +9,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .api import MisterClient
+from mister_fpga import MisterClient
+
 from .const import DOMAIN, KEYBOARD_NAMES
 from .entity import MisterEntity
 

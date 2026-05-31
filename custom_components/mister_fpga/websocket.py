@@ -7,46 +7,11 @@ from dataclasses import replace
 
 import aiohttp
 
-from .api import MisterStatus
-from .const import WS_PATH
+from mister_fpga import WS_PATH, MisterStatus, apply_ws_message
 
 _LOGGER = logging.getLogger(__name__)
 
 _RECONNECT_DELAY = 5
-
-
-def apply_ws_message(
-    message: str,
-    status: MisterStatus,
-    menu_path: str | None,
-    index_state: tuple[bool, bool],
-) -> tuple[MisterStatus, str | None, tuple[bool, bool]]:
-    """Pure reducer: apply one WS text frame to (status, menu_path, index_state)."""
-    prefix, _, rest = message.partition(":")
-    if prefix == "coreRunning":
-        core = rest.strip() or None
-        if core is None:
-            return (
-                replace(status, core=None, game=None, game_name=None),
-                menu_path,
-                index_state,
-            )
-        return replace(status, core=core), menu_path, index_state
-    if prefix == "gameRunning":
-        rest = rest.strip()
-        if not rest:
-            return replace(status, game=None, game_name=None), menu_path, index_state
-        _, _, name = rest.partition("/")
-        game_name = name.rsplit(".", 1)[0] if name else None
-        return replace(status, game=rest, game_name=game_name), menu_path, index_state
-    if prefix == "menuNavigation":
-        return status, rest.strip() or None, index_state
-    if prefix == "indexStatus":
-        parts = rest.split(",")
-        exists = len(parts) > 0 and parts[0] == "y"
-        in_progress = len(parts) > 1 and parts[1] == "y"
-        return status, menu_path, (exists, in_progress)
-    return status, menu_path, index_state
 
 
 class MisterWebSocket:

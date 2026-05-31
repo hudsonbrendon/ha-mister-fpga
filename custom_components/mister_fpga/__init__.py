@@ -9,7 +9,8 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import MisterClient
+from mister_fpga import MisterClient
+
 from .const import (
     CONF_SCAN_INTERVAL,
     CONF_SSH_ENABLED,
@@ -227,9 +228,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up MiSTer FPGA from a config entry."""
     session = async_get_clientsession(hass)
     client = MisterClient(
-        session,
         entry.data[CONF_HOST],
         entry.data.get(CONF_PORT, DEFAULT_PORT),
+        session=session,
     )
     scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     coordinator = MisterDataUpdateCoordinator(hass, client, scan_interval)
@@ -238,7 +239,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await coordinator.async_refresh_scripts()
 
     if entry.options.get(CONF_SSH_ENABLED) and entry.options.get(CONF_SSH_PASSWORD):
-        from .ssh import MisterSSH
+        from mister_fpga import MisterSSH
         coordinator.ssh = MisterSSH(
             entry.data[CONF_HOST],
             entry.options.get(CONF_SSH_PORT, DEFAULT_SSH_PORT),

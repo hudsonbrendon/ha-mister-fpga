@@ -8,7 +8,7 @@ ENTITY = "switch.mister_fpga_background_music"
 
 async def test_switch_turn_on(hass, init_integration):
     with patch(
-        "custom_components.mister_fpga.api.MisterClient.async_get_music_status",
+        "mister_fpga.client.MisterClient.async_get_music_status",
         new=AsyncMock(return_value={"playing": False}),
     ):
         entry, coordinator = await init_integration()
@@ -24,7 +24,7 @@ async def test_switch_turn_on(hass, init_integration):
 
 async def test_switch_turn_off(hass, init_integration):
     with patch(
-        "custom_components.mister_fpga.api.MisterClient.async_get_music_status",
+        "mister_fpga.client.MisterClient.async_get_music_status",
         new=AsyncMock(return_value={"playing": False}),
     ):
         entry, coordinator = await init_integration()

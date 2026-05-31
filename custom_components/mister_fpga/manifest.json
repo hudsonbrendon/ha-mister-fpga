@@ -7,6 +7,6 @@
   "integration_type": "device",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/hudsonbrendon/ha-mister-fpga/issues",
-  "requirements": ["asyncssh==2.23.0"],
-  "version": "0.2.1"
+  "requirements": ["python-mister-fpga==0.1.0"],
+  "version": "0.3.0"
 }

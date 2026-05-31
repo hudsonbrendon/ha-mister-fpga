@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock
 
-from custom_components.mister_fpga.api import MisterConnectionError, MisterStatus
+from mister_fpga import MisterConnectionError, MisterStatus
+
 from custom_components.mister_fpga.const import EVENT_GAME_CHANGED
 from custom_components.mister_fpga.coordinator import MisterDataUpdateCoordinator
 

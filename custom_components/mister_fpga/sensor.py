@@ -16,7 +16,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .api import MisterStatus
+from mister_fpga import MisterStatus
+
 from .const import DOMAIN
 from .coordinator import MisterDataUpdateCoordinator
 from .entity import MisterEntity

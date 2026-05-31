@@ -152,7 +152,7 @@ class MisterMusicPlaylistSelect(MisterEntity, SelectEntity):
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
-        from .api import MisterConnectionError
+        from mister_fpga import MisterConnectionError
         try:
             self._playlists = await self.coordinator.client.async_get_music_playlists()
         except MisterConnectionError:

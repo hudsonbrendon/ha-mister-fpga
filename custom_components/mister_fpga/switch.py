@@ -8,7 +8,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .api import MisterConnectionError
+from mister_fpga import MisterConnectionError
+
 from .const import DOMAIN
 from .entity import MisterEntity
 

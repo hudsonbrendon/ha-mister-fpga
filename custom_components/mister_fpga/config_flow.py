@@ -14,7 +14,8 @@ from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import MisterClient, MisterConnectionError
+from mister_fpga import MisterClient, MisterConnectionError
+
 from .const import (
     CONF_SCAN_INTERVAL,
     DEFAULT_NAME,
@@ -46,7 +47,7 @@ class MisterConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             session = async_get_clientsession(self.hass)
             client = MisterClient(
-                session, user_input[CONF_HOST], user_input[CONF_PORT]
+                user_input[CONF_HOST], user_input[CONF_PORT], session=session
             )
             try:
                 await client.async_get_status()

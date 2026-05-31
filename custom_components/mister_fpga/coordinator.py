@@ -7,7 +7,8 @@ from datetime import timedelta
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .api import MisterClient, MisterConnectionError, MisterStatus
+from mister_fpga import MisterClient, MisterConnectionError, MisterStatus
+
 from .const import DOMAIN, EVENT_GAME_CHANGED
 
 _LOGGER = logging.getLogger(__name__)
