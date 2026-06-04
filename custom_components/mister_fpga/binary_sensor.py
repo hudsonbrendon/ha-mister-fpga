@@ -14,6 +14,8 @@ from mister_fpga import RA_SUPPORTED_SYSTEMS
 from .const import DOMAIN
 from .entity import MisterEntity
 
+_RA_SUPPORTED_UPPER = {s.upper() for s in RA_SUPPORTED_SYSTEMS}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -107,6 +109,6 @@ class MisterRAGameSupportedSensor(MisterEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         data = self.coordinator.data
-        if not (data and data.is_running_game):
+        if not (data and data.is_running_game and data.core):
             return False
-        return data.core in RA_SUPPORTED_SYSTEMS
+        return data.core.upper() in _RA_SUPPORTED_UPPER
