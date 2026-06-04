@@ -40,4 +40,9 @@ async def async_get_config_entry_diagnostics(
         },
         "ssh_enabled": coordinator.ssh is not None,
         "ssh_data": coordinator.ssh_data,
+        "retroachievements": (
+            asdict(coordinator.ra_data)
+            if getattr(coordinator, "ra_data", None) is not None
+            else None
+        ),
     }
