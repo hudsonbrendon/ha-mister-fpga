@@ -13,6 +13,7 @@ from mister_fpga.ra_web import MisterRAWebError
 from .const import DOMAIN
 from .coordinator import MisterDataUpdateCoordinator
 from .entity import MisterEntity
+from .ra_web_coordinator import MisterRAWebCoordinator
 from .ra_web_entity import MisterRAWebEntity
 
 
@@ -78,7 +79,12 @@ class MisterRABadgeImage(MisterRAWebEntity, ImageEntity):
     _attr_translation_key = "ra_last_achievement_badge"
     _attr_content_type = "image/png"
 
-    def __init__(self, hass, coordinator, entry) -> None:
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: MisterRAWebCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
         MisterRAWebEntity.__init__(self, coordinator, entry)
         ImageEntity.__init__(self, hass)
         self._attr_unique_id = f"{entry.entry_id}_ra_last_achievement_badge"
@@ -87,7 +93,8 @@ class MisterRABadgeImage(MisterRAWebEntity, ImageEntity):
         self._attr_image_last_updated = dt_util.utcnow()
 
     def _handle_coordinator_update(self) -> None:
-        self._attr_image_last_updated = dt_util.utcnow()
+        if self._badge_url() != self._current_url:
+            self._attr_image_last_updated = dt_util.utcnow()
         super()._handle_coordinator_update()
 
     def _badge_url(self) -> str | None:
