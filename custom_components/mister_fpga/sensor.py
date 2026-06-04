@@ -256,6 +256,14 @@ async def async_setup_entry(
         descriptions.extend(RA_SENSORS)
     async_add_entities(MisterSensor(coordinator, entry, d) for d in descriptions)
 
+    ra_web_coordinator = getattr(coordinator, "ra_web_coordinator", None)
+    if ra_web_coordinator is not None:
+        from .sensor_ra_web import RA_WEB_SENSORS, MisterRAWebSensor
+
+        async_add_entities(
+            MisterRAWebSensor(ra_web_coordinator, entry, d) for d in RA_WEB_SENSORS
+        )
+
 
 class MisterSensor(MisterEntity, SensorEntity):
     entity_description: MisterSensorEntityDescription
