@@ -27,9 +27,15 @@
           "ssh_enabled": "Ativar telemetria SSH",
           "ssh_username": "Usuário SSH",
           "ssh_password": "Senha SSH",
-          "ssh_port": "Porta SSH"
+          "ssh_port": "Porta SSH",
+          "ra_username": "Usuário RetroAchievements",
+          "ra_api_key": "Chave da Web API RetroAchievements",
+          "ra_cloud_interval": "Intervalo de atualização RetroAchievements (segundos)"
         }
       }
+    },
+    "error": {
+      "invalid_auth": "Credenciais do RetroAchievements inválidas"
     }
   },
   "entity": {
@@ -65,7 +71,13 @@
       "ra_mode": { "name": "Modo RetroAchievements" },
       "ra_binary": { "name": "Binário RetroAchievements" },
       "ra_user": { "name": "Usuário RetroAchievements" },
-      "ra_active_cores": { "name": "Cores RA Ativos" }
+      "ra_active_cores": { "name": "Cores RA Ativos" },
+      "ra_hardcore_points": { "name": "RA Pontos Hardcore" },
+      "ra_softcore_points": { "name": "RA Pontos Softcore" },
+      "ra_rank": { "name": "RA Rank" },
+      "ra_current_game": { "name": "RA Jogo Atual" },
+      "ra_last_achievement": { "name": "RA Última Conquista" },
+      "ra_recent_games": { "name": "RA Jogos Recentes" }
     },
     "button": {
       "reboot": { "name": "Reiniciar" },
@@ -116,7 +128,8 @@
       "ra_hardcore": { "name": "Hardcore RetroAchievements" }
     },
     "image": {
-      "latest_screenshot": { "name": "Último screenshot" }
+      "latest_screenshot": { "name": "Último screenshot" },
+      "ra_last_achievement_badge": { "name": "RA Badge da Última Conquista" }
     },
     "number": {
       "video_brightness": {"name": "Brilho"},

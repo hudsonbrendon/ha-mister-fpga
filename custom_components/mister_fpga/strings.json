@@ -27,9 +27,15 @@
           "ssh_enabled": "Enable SSH telemetry",
           "ssh_username": "SSH username",
           "ssh_password": "SSH password",
-          "ssh_port": "SSH port"
+          "ssh_port": "SSH port",
+          "ra_username": "RetroAchievements username",
+          "ra_api_key": "RetroAchievements Web API key",
+          "ra_cloud_interval": "RetroAchievements poll interval (seconds)"
         }
       }
+    },
+    "error": {
+      "invalid_auth": "Invalid RetroAchievements credentials"
     }
   },
   "entity": {
@@ -65,7 +71,13 @@
       "ra_mode": { "name": "RetroAchievements Mode" },
       "ra_binary": { "name": "RetroAchievements Binary" },
       "ra_user": { "name": "RetroAchievements User" },
-      "ra_active_cores": { "name": "RetroAchievements Active Cores" }
+      "ra_active_cores": { "name": "RetroAchievements Active Cores" },
+      "ra_hardcore_points": { "name": "RA Hardcore Points" },
+      "ra_softcore_points": { "name": "RA Softcore Points" },
+      "ra_rank": { "name": "RA Rank" },
+      "ra_current_game": { "name": "RA Current Game" },
+      "ra_last_achievement": { "name": "RA Last Achievement" },
+      "ra_recent_games": { "name": "RA Recent Games" }
     },
     "button": {
       "reboot": { "name": "Reboot" },
@@ -116,7 +128,8 @@
       "ra_hardcore": { "name": "RetroAchievements Hardcore" }
     },
     "image": {
-      "latest_screenshot": { "name": "Latest screenshot" }
+      "latest_screenshot": { "name": "Latest screenshot" },
+      "ra_last_achievement_badge": { "name": "RA Last Achievement Badge" }
     },
     "number": {
       "video_brightness": {"name": "Video brightness"},
