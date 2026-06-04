@@ -9,7 +9,7 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from mister_fpga import MisterClient
+from mister_fpga import MisterClient, MisterRA
 
 from .const import (
     CONF_SCAN_INTERVAL,
@@ -246,6 +246,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry.options.get(CONF_SSH_USERNAME, DEFAULT_SSH_USERNAME),
             entry.options[CONF_SSH_PASSWORD],
         )
+        coordinator.ra = MisterRA(coordinator.ssh)
+        await coordinator.async_refresh_ssh()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     _register_services(hass)
