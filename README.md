@@ -54,6 +54,10 @@ buttons, video adjustments, and more.
   changes and indexing status; polling is the fallback.
 - **Optional SSH telemetry** — opt-in layer for true running core, uptime, RAM %, CPU
   load (1m), and real firmware build date.
+- **Optional RetroAchievements cloud stats** — opt-in layer that fetches your RA account
+  stats (hardcore/softcore points, global rank, current game progress, last achievement,
+  and recent games) directly from the RetroAchievements Web API. Works without SSH and
+  even while the MiSTer is powered off; polled on a separate slow interval (default 5 min).
 - **Local polling** — no cloud; talks straight to the mrext Remote service on your
   network.
 - **Localized** — UI and entities translated to English and Portugues (Brasil).
@@ -245,6 +249,55 @@ password `1`). When enabled, the integration connects over SSH to read:
 **Note:** Temperature is not available — the DE10-Nano's Cyclone V SoC has no on-die
 temperature sensor accessible from Linux. Power-off is also not possible; only reboot
 is supported.
+
+## Optional: RetroAchievements cloud stats
+
+Enable cloud stats via **Settings → Devices & Services → MiSTer FPGA → Configure**
+(gear icon / **Configure** button on the integration entry).
+
+### Getting a Web API key
+
+1. Log in at [retroachievements.org](https://retroachievements.org).
+2. Go to **Settings → Keys** — copy the **Web API Key** shown there.
+
+### Configuring the integration
+
+In the Options dialog, fill in:
+
+| Field | Description |
+|-------|-------------|
+| **RetroAchievements username** | Your RA account username |
+| **RetroAchievements Web API key** | The Web API Key from your RA settings |
+| **RA cloud poll interval (s)** | How often to refresh cloud data (default `300` s; min `60`, max `3600`) |
+
+Save the options — the integration will reload automatically and the cloud-stat entities
+will appear.
+
+> **Works without SSH and while the MiSTer is powered off.** Cloud stats are fetched
+> directly from the RetroAchievements Web API; the MiSTer does not need to be online.
+
+### Cloud-stats entities
+
+The following entities are added once valid credentials are saved. They are polled on a
+separate slow interval (default 5 minutes) to respect the RetroAchievements Web API rate
+limits.
+
+#### Sensors
+
+| Entity | Description |
+|--------|-------------|
+| `sensor.<name>_ra_hardcore_points` | Total hardcore points earned on the account |
+| `sensor.<name>_ra_softcore_points` | Total softcore points earned on the account |
+| `sensor.<name>_ra_rank` | Global rank on RetroAchievements (attribute: `total_ranked`) |
+| `sensor.<name>_ra_current_game` | Title of the game last played; attributes: `earned`, `possible`, `percent`, `console`, `last_played` |
+| `sensor.<name>_ra_last_achievement` | Title of the most recently earned achievement; attributes: `game`, `points`, `date`, `badge_url` |
+| `sensor.<name>_ra_recent_games` | Title of the most recently played game; attribute: `games` (list with `title`, `console`, `earned`, `possible`, `percent`, `last_played` per entry) |
+
+#### Image
+
+| Entity | Description |
+|--------|-------------|
+| `image.<name>_ra_last_achievement_badge` | Badge image of the most recently earned achievement, fetched from RetroAchievements |
 
 ## Events
 
