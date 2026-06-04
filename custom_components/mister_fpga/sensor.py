@@ -200,13 +200,61 @@ SENSORS: tuple[MisterSensorEntityDescription, ...] = (
 )
 
 
+def _ra(coordinator):
+    return getattr(coordinator, "ra_data", None)
+
+
+RA_SENSORS: tuple[MisterSensorEntityDescription, ...] = (
+    MisterSensorEntityDescription(
+        key="ra_mode",
+        translation_key="ra_mode",
+        icon="mdi:trophy",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        coordinator_fn=lambda c: (
+            None if _ra(c) is None else ("RA cores" if _ra(c).cores_on else "Stock")
+        ),
+    ),
+    MisterSensorEntityDescription(
+        key="ra_binary",
+        translation_key="ra_binary",
+        icon="mdi:chip",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        coordinator_fn=lambda c: (
+            None if _ra(c) is None
+            else ("RA (odelot)" if _ra(c).binary_ra else "Stock")
+        ),
+    ),
+    MisterSensorEntityDescription(
+        key="ra_user",
+        translation_key="ra_user",
+        icon="mdi:account",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        coordinator_fn=lambda c: None if _ra(c) is None else _ra(c).username,
+    ),
+    MisterSensorEntityDescription(
+        key="ra_active_cores",
+        translation_key="ra_active_cores",
+        icon="mdi:trophy-variant",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        coordinator_fn=lambda c: (
+            None if _ra(c) is None
+            else f"{_ra(c).cores_active}/{_ra(c).cores_total}"
+        ),
+    ),
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities(MisterSensor(coordinator, entry, d) for d in SENSORS)
+    descriptions = list(SENSORS)
+    ra_data = getattr(coordinator, "ra_data", None)
+    if ra_data is not None and ra_data.installed:
+        descriptions.extend(RA_SENSORS)
+    async_add_entities(MisterSensor(coordinator, entry, d) for d in descriptions)
 
 
 class MisterSensor(MisterEntity, SensorEntity):
