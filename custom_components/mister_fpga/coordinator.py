@@ -46,6 +46,8 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
         self.index_exists: bool = False
         self.websocket = None
         self.ssh = None
+        self.ra = None
+        self.ra_data = None
         self.ssh_data: dict = {}
 
     async def _async_update_data(self) -> MisterStatus:
@@ -76,6 +78,8 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
         if self.ssh is None:
             return
         self.ssh_data = await self.ssh.async_probe()
+        if self.ra is not None:
+            self.ra_data = await self.ra.async_status()
 
     async def _safe(self, coro, default):
         """Await coro, returning default on MisterConnectionError."""

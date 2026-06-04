@@ -37,7 +37,8 @@
       "online": { "name": "Online" },
       "game_running": { "name": "Game running" },
       "background_music_active": { "name": "Background music active" },
-      "indexing": { "name": "Indexing" }
+      "indexing": { "name": "Indexing" },
+      "ra_game_supported": { "name": "RetroAchievements Game Supported" }
     },
     "sensor": {
       "core": { "name": "Core" },
@@ -60,7 +61,11 @@
       "uptime": { "name": "Uptime" },
       "cpu_load": { "name": "CPU load" },
       "memory_used": { "name": "Memory used" },
-      "firmware_date": { "name": "Firmware date" }
+      "firmware_date": { "name": "Firmware date" },
+      "ra_mode": { "name": "RetroAchievements Mode" },
+      "ra_binary": { "name": "RetroAchievements Binary" },
+      "ra_user": { "name": "RetroAchievements User" },
+      "ra_active_cores": { "name": "RetroAchievements Active Cores" }
     },
     "button": {
       "reboot": { "name": "Reboot" },
@@ -106,7 +111,9 @@
       "run_script": { "name": "Run script" }
     },
     "switch": {
-      "background_music": { "name": "Background music" }
+      "background_music": { "name": "Background music" },
+      "ra_cores": { "name": "RetroAchievements Cores" },
+      "ra_hardcore": { "name": "RetroAchievements Hardcore" }
     },
     "image": {
       "latest_screenshot": { "name": "Latest screenshot" }
