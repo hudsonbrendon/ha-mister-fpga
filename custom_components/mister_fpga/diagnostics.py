@@ -8,10 +8,17 @@ from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import CONF_SSH_PASSWORD, DOMAIN
+from .const import CONF_RA_API_KEY, CONF_SSH_PASSWORD, DOMAIN
 from .coordinator import MisterDataUpdateCoordinator
 
-TO_REDACT = {CONF_SSH_PASSWORD}
+TO_REDACT = {CONF_SSH_PASSWORD, CONF_RA_API_KEY}
+
+
+def _ra_web_diagnostics(coordinator) -> dict | None:
+    web_coord = getattr(coordinator, "ra_web_coordinator", None)
+    if web_coord is None or web_coord.data is None:
+        return None
+    return asdict(web_coord.data)
 
 
 async def async_get_config_entry_diagnostics(
@@ -45,4 +52,5 @@ async def async_get_config_entry_diagnostics(
             if getattr(coordinator, "ra_data", None) is not None
             else None
         ),
+        "retroachievements_cloud": _ra_web_diagnostics(coordinator),
     }

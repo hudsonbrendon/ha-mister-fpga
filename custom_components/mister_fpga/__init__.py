@@ -9,21 +9,26 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from mister_fpga import MisterClient, MisterRA
+from mister_fpga import MisterClient, MisterRA, MisterRAWeb
 
 from .const import (
+    CONF_RA_API_KEY,
+    CONF_RA_CLOUD_INTERVAL,
+    CONF_RA_USERNAME,
     CONF_SCAN_INTERVAL,
     CONF_SSH_ENABLED,
     CONF_SSH_PASSWORD,
     CONF_SSH_PORT,
     CONF_SSH_USERNAME,
     DEFAULT_PORT,
+    DEFAULT_RA_CLOUD_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SSH_PORT,
     DEFAULT_SSH_USERNAME,
     DOMAIN,
 )
 from .coordinator import MisterDataUpdateCoordinator
+from .ra_web_coordinator import MisterRAWebCoordinator
 from .websocket import MisterWebSocket
 
 # Platforms are appended incrementally as each platform module is implemented
@@ -96,6 +101,17 @@ SERVICE_CREATE_SHORTCUT_SCHEMA = vol.Schema(
         vol.Required("name"): cv.string,
     }
 )
+
+
+def _build_ra_web_coordinator(hass, entry, session):
+    """Build the RA web coordinator when username + api key are configured."""
+    user = entry.options.get(CONF_RA_USERNAME)
+    key = entry.options.get(CONF_RA_API_KEY)
+    if not user or not key:
+        return None
+    web = MisterRAWeb(user, key, session=session)
+    interval = entry.options.get(CONF_RA_CLOUD_INTERVAL, DEFAULT_RA_CLOUD_INTERVAL)
+    return MisterRAWebCoordinator(hass, web, interval)
 
 
 def _register_services(hass: HomeAssistant) -> None:
@@ -248,6 +264,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         coordinator.ra = MisterRA(coordinator.ssh)
         await coordinator.async_refresh_ssh()
+
+    ra_web_coordinator = _build_ra_web_coordinator(hass, entry, session)
+    if ra_web_coordinator is not None:
+        # async_refresh (not first_refresh): a cloud failure must NOT abort setup.
+        await ra_web_coordinator.async_refresh()
+    coordinator.ra_web_coordinator = ra_web_coordinator
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     _register_services(hass)

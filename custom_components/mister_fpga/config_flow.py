@@ -14,15 +14,22 @@ from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from mister_fpga import MisterClient, MisterConnectionError
+from mister_fpga import MisterClient, MisterConnectionError, MisterRAWeb
+from mister_fpga.ra_web import MisterRAWebError
 
 from .const import (
+    CONF_RA_API_KEY,
+    CONF_RA_CLOUD_INTERVAL,
+    CONF_RA_USERNAME,
     CONF_SCAN_INTERVAL,
     DEFAULT_NAME,
     DEFAULT_PORT,
+    DEFAULT_RA_CLOUD_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    MAX_RA_CLOUD_INTERVAL,
     MAX_SCAN_INTERVAL,
+    MIN_RA_CLOUD_INTERVAL,
     MIN_SCAN_INTERVAL,
 )
 
@@ -78,11 +85,6 @@ class MisterOptionsFlow(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
-        current = self._entry.options.get(
-            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-        )
         from .const import (
             CONF_SSH_ENABLED,
             CONF_SSH_PASSWORD,
@@ -91,28 +93,58 @@ class MisterOptionsFlow(OptionsFlow):
             DEFAULT_SSH_PORT,
             DEFAULT_SSH_USERNAME,
         )
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            ra_user = user_input.get(CONF_RA_USERNAME)
+            ra_key = user_input.get(CONF_RA_API_KEY)
+            if ra_user and ra_key:
+                session = async_get_clientsession(self.hass)
+                web = MisterRAWeb(ra_user, ra_key, session=session)
+                try:
+                    await web.async_validate()
+                except MisterRAWebError:
+                    errors["base"] = "invalid_auth"
+            if not errors:
+                return self.async_create_entry(title="", data=user_input)
+
         opts = self._entry.options
+        current = opts.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
         schema = vol.Schema(
             {
                 vol.Optional(CONF_SCAN_INTERVAL, default=current): vol.All(
                     int, vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)
                 ),
                 vol.Optional(
-                    CONF_SSH_ENABLED,
-                    default=opts.get(CONF_SSH_ENABLED, False),
+                    CONF_SSH_ENABLED, default=opts.get(CONF_SSH_ENABLED, False)
                 ): bool,
                 vol.Optional(
                     CONF_SSH_USERNAME,
                     default=opts.get(CONF_SSH_USERNAME, DEFAULT_SSH_USERNAME),
                 ): str,
                 vol.Optional(
-                    CONF_SSH_PASSWORD,
-                    default=opts.get(CONF_SSH_PASSWORD, ""),
+                    CONF_SSH_PASSWORD, default=opts.get(CONF_SSH_PASSWORD, "")
                 ): str,
                 vol.Optional(
-                    CONF_SSH_PORT,
-                    default=opts.get(CONF_SSH_PORT, DEFAULT_SSH_PORT),
+                    CONF_SSH_PORT, default=opts.get(CONF_SSH_PORT, DEFAULT_SSH_PORT)
                 ): int,
+                vol.Optional(
+                    CONF_RA_USERNAME, default=opts.get(CONF_RA_USERNAME, "")
+                ): str,
+                vol.Optional(
+                    CONF_RA_API_KEY, default=opts.get(CONF_RA_API_KEY, "")
+                ): str,
+                vol.Optional(
+                    CONF_RA_CLOUD_INTERVAL,
+                    default=opts.get(
+                        CONF_RA_CLOUD_INTERVAL, DEFAULT_RA_CLOUD_INTERVAL
+                    ),
+                ): vol.All(
+                    int,
+                    vol.Range(min=MIN_RA_CLOUD_INTERVAL, max=MAX_RA_CLOUD_INTERVAL),
+                ),
             }
         )
-        return self.async_show_form(step_id="init", data_schema=schema)
+        return self.async_show_form(
+            step_id="init", data_schema=schema, errors=errors
+        )

@@ -48,6 +48,7 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
         self.ssh = None
         self.ra = None
         self.ra_data = None
+        self.ra_web_coordinator = None
         self.ssh_data: dict = {}
 
     async def _async_update_data(self) -> MisterStatus:
