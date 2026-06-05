@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="custom_components/mister_fpga/brand/dark_logo.png">
-    <img src="custom_components/mister_fpga/brand/logo.png" alt="MiSTer FPGA" width="420">
-  </picture>
+  <img src="assets/mister-fpga.png" alt="MiSTer FPGA" width="480">
 </p>
 
 # MiSTer FPGA for Home Assistant
