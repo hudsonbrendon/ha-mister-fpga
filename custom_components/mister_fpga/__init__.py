@@ -129,12 +129,12 @@ def _register_services(hass: HomeAssistant) -> None:
     async def _launch_game(call: ServiceCall) -> None:
         coord = _coordinator(call)
         await coord.client.async_launch_game(call.data["path"])
-        await coord.async_request_refresh()
+        await coord.async_request_refresh_full()
 
     async def _launch_system(call: ServiceCall) -> None:
         coord = _coordinator(call)
         await coord.client.async_launch_system(call.data["system_id"])
-        await coord.async_request_refresh()
+        await coord.async_request_refresh_full()
 
     async def _search_games(call: ServiceCall) -> dict:
         coord = _coordinator(call)
@@ -157,12 +157,12 @@ def _register_services(hass: HomeAssistant) -> None:
     async def _launch(call: ServiceCall) -> None:
         coord = _coordinator(call)
         await coord.client.async_launch_path(call.data["path"])
-        await coord.async_request_refresh()
+        await coord.async_request_refresh_full()
 
     async def _launch_token(call: ServiceCall) -> None:
         coord = _coordinator(call)
         await coord.client.async_launch_token(call.data["data"])
-        await coord.async_request_refresh()
+        await coord.async_request_refresh_full()
 
     async def _set_ini_value(call: ServiceCall) -> None:
         coord = _coordinator(call)
@@ -173,12 +173,12 @@ def _register_services(hass: HomeAssistant) -> None:
     async def _set_wallpaper(call: ServiceCall) -> None:
         coord = _coordinator(call)
         await coord.client.async_set_wallpaper(call.data["filename"])
-        await coord.async_request_refresh()
+        await coord.async_request_refresh_full()
 
     async def _set_background_mode(call: ServiceCall) -> None:
         coord = _coordinator(call)
         await coord.client.async_set_background_mode(call.data["mode"])
-        await coord.async_request_refresh()
+        await coord.async_request_refresh_full()
 
     async def _send_keyboard_raw(call: ServiceCall) -> None:
         coord = _coordinator(call)

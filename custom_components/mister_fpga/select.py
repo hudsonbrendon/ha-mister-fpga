@@ -64,7 +64,7 @@ class MisterSystemSelect(MisterEntity, SelectEntity):
         for system in self.coordinator.systems:
             if system.get("name") == option:
                 await self.coordinator.client.async_launch_system(system["id"])
-                await self.coordinator.async_request_refresh()
+                await self.coordinator.async_request_refresh_full()
                 return
 
 
@@ -91,7 +91,7 @@ class MisterActiveIniSelect(MisterEntity, SelectEntity):
         for i in self.coordinator.inis:
             if i.get("displayName") == option:
                 await self.coordinator.client.async_set_active_ini(i["id"])
-                await self.coordinator.async_request_refresh()
+                await self.coordinator.async_request_refresh_full()
                 return
 
 
@@ -113,7 +113,7 @@ class MisterBackgroundModeSelect(MisterEntity, SelectEntity):
         await self.coordinator.client.async_set_background_mode(
             BACKGROUND_MODES[option]
         )
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_request_refresh_full()
 
 
 class MisterWallpaperSelect(MisterEntity, SelectEntity):
@@ -138,7 +138,7 @@ class MisterWallpaperSelect(MisterEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         await self.coordinator.client.async_set_wallpaper(option)
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_request_refresh_full()
 
 
 class MisterMusicPlaylistSelect(MisterEntity, SelectEntity):
@@ -169,7 +169,7 @@ class MisterMusicPlaylistSelect(MisterEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         await self.coordinator.client.async_set_music_playlist(option)
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_request_refresh_full()
 
 
 class MisterMusicPlaybackSelect(MisterEntity, SelectEntity):
@@ -187,7 +187,7 @@ class MisterMusicPlaybackSelect(MisterEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         await self.coordinator.client.async_set_music_playback(option)
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_request_refresh_full()
 
 
 class MisterRunScriptSelect(MisterEntity, SelectEntity):

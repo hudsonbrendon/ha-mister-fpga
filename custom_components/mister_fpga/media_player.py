@@ -83,11 +83,11 @@ class MisterMediaPlayer(MisterEntity, MediaPlayerEntity):
         for system in self.coordinator.systems:
             if system.get("name") == source:
                 await self.coordinator.client.async_launch_system(system["id"])
-                await self.coordinator.async_request_refresh()
+                await self.coordinator.async_request_refresh_full()
                 return
 
     async def async_play_media(
         self, media_type: str, media_id: str, **kwargs: Any
     ) -> None:
         await self.coordinator.client.async_launch_game(media_id)
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_request_refresh_full()
