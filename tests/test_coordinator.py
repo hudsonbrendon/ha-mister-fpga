@@ -105,6 +105,29 @@ async def test_coordinator_extras_tolerate_errors(hass):
     assert coordinator.screenshots_count == 0
 
 
+async def test_slow_extras_are_throttled(hass):
+    """Music polls every cycle; wallpapers/INIs/peers/screenshots do not."""
+    from unittest.mock import AsyncMock
+    client = AsyncMock()
+    client.async_get_music_status.return_value = {"track": "x.mp3"}
+    client.async_get_wallpapers.return_value = {"active": "a.png"}
+    client.async_get_inis.return_value = {"inis": [], "active": 1}
+    client.async_get_ini_values.return_value = {}
+    client.async_get_peers.return_value = []
+    client.async_get_screenshots.return_value = []
+    coordinator = MisterDataUpdateCoordinator(hass, client, 15)
+
+    await coordinator.async_refresh_extras()
+    await coordinator.async_refresh_extras()
+
+    assert client.async_get_music_status.call_count == 2
+    assert client.async_get_wallpapers.call_count == 1
+
+    # a write forces the slow set to come back immediately
+    await coordinator.async_refresh_extras(force=True)
+    assert client.async_get_wallpapers.call_count == 2
+
+
 async def test_coordinator_refresh_scripts(hass):
     from unittest.mock import AsyncMock
     client = AsyncMock()

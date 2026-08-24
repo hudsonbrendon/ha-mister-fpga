@@ -6,12 +6,18 @@ from datetime import timedelta
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.util.dt import utcnow
 
 from mister_fpga import MisterClient, MisterConnectionError, MisterStatus
 
 from .const import DOMAIN, EVENT_GAME_CHANGED
 
 _LOGGER = logging.getLogger(__name__)
+
+# Wallpapers, INIs and peers barely move, and the screenshot count costs a full
+# listing. They refresh on this slower cadence instead of on every status poll;
+# writes call async_request_refresh_full() so the UI still updates immediately.
+SLOW_EXTRAS_INTERVAL = timedelta(minutes=5)
 
 
 class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
@@ -50,6 +56,7 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
         self.ra_data = None
         self.ra_web_coordinator = None
         self.ssh_data: dict = {}
+        self._slow_extras_at = None
 
     async def _async_update_data(self) -> MisterStatus:
         """Fetch status; an offline device is not a fatal error."""
@@ -90,10 +97,29 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
             _LOGGER.debug("MiSTer extra fetch failed: %s", err)
             return default
 
-    async def async_refresh_extras(self) -> None:
-        """Best-effort refresh of secondary state; never raises."""
+    async def async_request_refresh_full(self) -> None:
+        """Refresh status and every extra now. Use after writing to the device."""
+        self._slow_extras_at = None
+        await self.async_request_refresh()
+
+    async def async_refresh_extras(self, force: bool = False) -> None:
+        """Best-effort refresh of secondary state; never raises.
+
+        Music status is polled every cycle (the track changes on its own);
+        the rest is throttled to SLOW_EXTRAS_INTERVAL unless force is set.
+        """
         music = await self._safe(self.client.async_get_music_status(), {})
         self.music = music if isinstance(music, dict) else {}
+
+        now = utcnow()
+        if (
+            not force
+            and self._slow_extras_at is not None
+            and now - self._slow_extras_at < SLOW_EXTRAS_INTERVAL
+        ):
+            return
+        self._slow_extras_at = now
+
         wallpapers = await self._safe(self.client.async_get_wallpapers(), {})
         self.wallpapers = wallpapers if isinstance(wallpapers, dict) else {}
         inis = await self._safe(self.client.async_get_inis(), {})
