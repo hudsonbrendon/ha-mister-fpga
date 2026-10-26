@@ -40,101 +40,267 @@
   },
   "entity": {
     "binary_sensor": {
-      "online": { "name": "Online" },
-      "game_running": { "name": "Game running" },
-      "background_music_active": { "name": "Background music active" },
-      "indexing": { "name": "Indexing" },
-      "ra_game_supported": { "name": "RetroAchievements Game Supported" }
+      "online": {
+        "name": "Online"
+      },
+      "game_running": {
+        "name": "Game running"
+      },
+      "background_music_active": {
+        "name": "Background music active"
+      },
+      "indexing": {
+        "name": "Indexing"
+      },
+      "ra_game_supported": {
+        "name": "RetroAchievements Game Supported"
+      }
     },
     "sensor": {
-      "core": { "name": "Core" },
-      "system": { "name": "System" },
-      "game": { "name": "Game" },
-      "remote_version": { "name": "Remote version" },
-      "hostname": { "name": "Hostname" },
-      "ip_address": { "name": "IP address" },
-      "dns_name": { "name": "DNS name" },
-      "disk_free": { "name": "Disk free" },
-      "disk_usage": { "name": "Disk usage" },
-      "last_updated": { "name": "Last updated" },
-      "mac_address": { "name": "MAC address" },
-      "music_track": { "name": "Music track" },
-      "music_playlist": { "name": "Music playlist" },
-      "peers": { "name": "Peers" },
-      "screenshots": { "name": "Screenshots" },
-      "menu_position": { "name": "Menu position" },
-      "active_core": { "name": "Active core" },
-      "uptime": { "name": "Uptime" },
-      "cpu_load": { "name": "CPU load" },
-      "memory_used": { "name": "Memory used" },
-      "firmware_date": { "name": "Firmware date" },
-      "ra_mode": { "name": "RetroAchievements Mode" },
-      "ra_binary": { "name": "RetroAchievements Binary" },
-      "ra_user": { "name": "RetroAchievements User" },
-      "ra_active_cores": { "name": "RetroAchievements Active Cores" },
-      "ra_hardcore_points": { "name": "RA Hardcore Points" },
-      "ra_softcore_points": { "name": "RA Softcore Points" },
-      "ra_rank": { "name": "RA Rank" },
-      "ra_current_game": { "name": "RA Current Game" },
-      "ra_last_achievement": { "name": "RA Last Achievement" },
-      "ra_recent_games": { "name": "RA Recent Games" }
+      "core": {
+        "name": "Core"
+      },
+      "system": {
+        "name": "System"
+      },
+      "game": {
+        "name": "Game"
+      },
+      "remote_version": {
+        "name": "Remote version"
+      },
+      "hostname": {
+        "name": "Hostname"
+      },
+      "ip_address": {
+        "name": "IP address"
+      },
+      "dns_name": {
+        "name": "DNS name"
+      },
+      "disk_free": {
+        "name": "Disk free"
+      },
+      "disk_usage": {
+        "name": "Disk usage"
+      },
+      "last_updated": {
+        "name": "Last updated"
+      },
+      "mac_address": {
+        "name": "MAC address"
+      },
+      "music_track": {
+        "name": "Music track"
+      },
+      "music_playlist": {
+        "name": "Music playlist"
+      },
+      "peers": {
+        "name": "Peers"
+      },
+      "screenshots": {
+        "name": "Screenshots"
+      },
+      "menu_position": {
+        "name": "Menu position"
+      },
+      "active_core": {
+        "name": "Active core"
+      },
+      "uptime": {
+        "name": "Uptime"
+      },
+      "cpu_load": {
+        "name": "CPU load"
+      },
+      "memory_used": {
+        "name": "Memory used"
+      },
+      "firmware_date": {
+        "name": "Firmware date"
+      },
+      "ra_mode": {
+        "name": "RetroAchievements Mode"
+      },
+      "ra_binary": {
+        "name": "RetroAchievements Binary"
+      },
+      "ra_user": {
+        "name": "RetroAchievements User"
+      },
+      "ra_active_cores": {
+        "name": "RetroAchievements Active Cores"
+      },
+      "ra_hardcore_points": {
+        "name": "RA Hardcore Points"
+      },
+      "ra_softcore_points": {
+        "name": "RA Softcore Points"
+      },
+      "ra_rank": {
+        "name": "RA Rank"
+      },
+      "ra_current_game": {
+        "name": "RA Current Game"
+      },
+      "ra_last_achievement": {
+        "name": "RA Last Achievement"
+      },
+      "ra_recent_games": {
+        "name": "RA Recent Games"
+      }
     },
     "button": {
-      "reboot": { "name": "Reboot" },
-      "go_to_menu": { "name": "Go to menu" },
-      "take_screenshot": { "name": "Take screenshot" },
-      "restart_remote": { "name": "Restart Remote" },
-      "index_games": { "name": "Index Games" },
-      "music_next": { "name": "Next track" },
-      "clear_wallpaper": { "name": "Clear wallpaper" },
-      "framebuffer_console": { "name": "Framebuffer console" },
-      "kill_script": { "name": "Kill script" },
-      "nav_up": { "name": "Nav up" },
-      "nav_down": { "name": "Nav down" },
-      "nav_left": { "name": "Nav left" },
-      "nav_right": { "name": "Nav right" },
-      "nav_confirm": { "name": "Nav confirm" },
-      "nav_back": { "name": "Nav back" },
-      "nav_cancel": { "name": "Nav cancel" },
-      "nav_menu": { "name": "Nav menu" },
-      "nav_osd": { "name": "Nav OSD" },
-      "nav_core_select": { "name": "Nav core select" },
-      "nav_user": { "name": "Nav user" },
-      "nav_volume_up": { "name": "Nav volume up" },
-      "nav_volume_down": { "name": "Nav volume down" },
-      "nav_volume_mute": { "name": "Nav volume mute" },
-      "nav_reset": { "name": "Nav reset" },
-      "nav_screenshot": { "name": "Nav screenshot" },
-      "nav_raw_screenshot": { "name": "Nav raw screenshot" },
-      "nav_console": { "name": "Nav console" },
-      "nav_exit_console": { "name": "Nav exit console" },
-      "nav_computer_osd": { "name": "Nav computer OSD" },
-      "nav_change_background": { "name": "Nav change background" },
-      "nav_pair_bluetooth": { "name": "Nav pair Bluetooth" },
-      "nav_toggle_core_dates": { "name": "Nav toggle core dates" }
+      "reboot": {
+        "name": "Reboot"
+      },
+      "go_to_menu": {
+        "name": "Go to menu"
+      },
+      "take_screenshot": {
+        "name": "Take screenshot"
+      },
+      "restart_remote": {
+        "name": "Restart Remote"
+      },
+      "index_games": {
+        "name": "Index Games"
+      },
+      "music_next": {
+        "name": "Next track"
+      },
+      "clear_wallpaper": {
+        "name": "Clear wallpaper"
+      },
+      "framebuffer_console": {
+        "name": "Framebuffer console"
+      },
+      "kill_script": {
+        "name": "Kill script"
+      },
+      "nav_up": {
+        "name": "Nav up"
+      },
+      "nav_down": {
+        "name": "Nav down"
+      },
+      "nav_left": {
+        "name": "Nav left"
+      },
+      "nav_right": {
+        "name": "Nav right"
+      },
+      "nav_confirm": {
+        "name": "Nav confirm"
+      },
+      "nav_back": {
+        "name": "Nav back"
+      },
+      "nav_cancel": {
+        "name": "Nav cancel"
+      },
+      "nav_menu": {
+        "name": "Nav menu"
+      },
+      "nav_osd": {
+        "name": "Nav OSD"
+      },
+      "nav_core_select": {
+        "name": "Nav core select"
+      },
+      "nav_user": {
+        "name": "Nav user"
+      },
+      "nav_volume_up": {
+        "name": "Nav volume up"
+      },
+      "nav_volume_down": {
+        "name": "Nav volume down"
+      },
+      "nav_volume_mute": {
+        "name": "Nav volume mute"
+      },
+      "nav_reset": {
+        "name": "Nav reset"
+      },
+      "nav_screenshot": {
+        "name": "Nav screenshot"
+      },
+      "nav_raw_screenshot": {
+        "name": "Nav raw screenshot"
+      },
+      "nav_console": {
+        "name": "Nav console"
+      },
+      "nav_exit_console": {
+        "name": "Nav exit console"
+      },
+      "nav_computer_osd": {
+        "name": "Nav computer OSD"
+      },
+      "nav_change_background": {
+        "name": "Nav change background"
+      },
+      "nav_pair_bluetooth": {
+        "name": "Nav pair Bluetooth"
+      },
+      "nav_toggle_core_dates": {
+        "name": "Nav toggle core dates"
+      }
     },
     "select": {
-      "launch_system": { "name": "Launch system" },
-      "active_ini": { "name": "Active INI" },
-      "background_mode": { "name": "Background mode" },
-      "wallpaper": { "name": "Wallpaper" },
-      "music_playlist": { "name": "Music playlist" },
-      "music_playback": { "name": "Music playback" },
-      "run_script": { "name": "Run script" }
+      "launch_system": {
+        "name": "Launch system"
+      },
+      "active_ini": {
+        "name": "Active INI"
+      },
+      "background_mode": {
+        "name": "Background mode"
+      },
+      "wallpaper": {
+        "name": "Wallpaper"
+      },
+      "music_playlist": {
+        "name": "Music playlist"
+      },
+      "music_playback": {
+        "name": "Music playback"
+      },
+      "run_script": {
+        "name": "Run script"
+      }
     },
     "switch": {
-      "background_music": { "name": "Background music" },
-      "ra_cores": { "name": "RetroAchievements Cores" },
-      "ra_hardcore": { "name": "RetroAchievements Hardcore" }
+      "background_music": {
+        "name": "Background music"
+      },
+      "ra_cores": {
+        "name": "RetroAchievements Cores"
+      },
+      "ra_hardcore": {
+        "name": "RetroAchievements Hardcore"
+      }
     },
     "image": {
-      "latest_screenshot": { "name": "Latest screenshot" },
-      "ra_last_achievement_badge": { "name": "RA Last Achievement Badge" }
+      "latest_screenshot": {
+        "name": "Latest screenshot"
+      },
+      "ra_last_achievement_badge": {
+        "name": "RA Last Achievement Badge"
+      }
     },
     "number": {
-      "video_brightness": {"name": "Video brightness"},
-      "video_contrast": {"name": "Video contrast"},
-      "video_saturation": {"name": "Video saturation"}
+      "video_brightness": {
+        "name": "Video brightness"
+      },
+      "video_contrast": {
+        "name": "Video contrast"
+      },
+      "video_saturation": {
+        "name": "Video saturation"
+      }
     }
   },
   "services": {
@@ -142,107 +308,194 @@
       "name": "Launch game",
       "description": "Launch a game by its file path on the MiSTer.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "path": { "name": "Path", "description": "Absolute path of the game file." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "path": {
+          "name": "Path",
+          "description": "Absolute path of the game file."
+        }
       }
     },
     "launch_system": {
       "name": "Launch system",
       "description": "Launch a core/system by its ID.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "system_id": { "name": "System ID", "description": "System/core ID, e.g. SNES." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "system_id": {
+          "name": "System ID",
+          "description": "System/core ID, e.g. SNES."
+        }
       }
     },
     "search_games": {
       "name": "Search games",
       "description": "Search indexed games and return the results.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "query": { "name": "Query", "description": "Search text." },
-        "system": { "name": "System", "description": "Restrict to a system ID (default: all)." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "query": {
+          "name": "Query",
+          "description": "Search text."
+        },
+        "system": {
+          "name": "System",
+          "description": "Restrict to a system ID (default: all)."
+        }
       }
     },
     "send_keyboard": {
       "name": "Send keyboard",
       "description": "Send a named keyboard key to the MiSTer.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "key": { "name": "Key", "description": "Key name, e.g. up, down, enter, escape." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "key": {
+          "name": "Key",
+          "description": "Key name, e.g. up, down, enter, escape."
+        }
       }
     },
     "take_screenshot": {
       "name": "Take screenshot",
       "description": "Trigger a screenshot capture on the MiSTer.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        }
       }
     },
     "run_script": {
       "name": "Run script",
       "description": "Launch a script from the MiSTer Scripts folder.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "filename": { "name": "Filename", "description": "Script filename, e.g. update_all.sh." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "filename": {
+          "name": "Filename",
+          "description": "Script filename, e.g. update_all.sh."
+        }
       }
     },
     "launch": {
       "name": "Launch",
       "description": "Launch any game, core, .mra or .mgl by absolute path.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "path": { "name": "Path", "description": "Absolute path to the file to launch." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "path": {
+          "name": "Path",
+          "description": "Absolute path to the file to launch."
+        }
       }
     },
     "launch_token": {
       "name": "Launch token",
       "description": "Launch base64url-encoded token data (NFC/QR format).",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "data": { "name": "Data", "description": "base64url-encoded launch data." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "data": {
+          "name": "Data",
+          "description": "base64url-encoded launch data."
+        }
       }
     },
     "set_ini_value": {
       "name": "Set INI value",
       "description": "Set a key in the active MiSTer.ini file.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "key": { "name": "Key", "description": "MiSTer.ini key, e.g. vga_scaler." },
-        "value": { "name": "Value", "description": "Value to set (empty string removes the key)." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "key": {
+          "name": "Key",
+          "description": "MiSTer.ini key, e.g. vga_scaler."
+        },
+        "value": {
+          "name": "Value",
+          "description": "Value to set (empty string removes the key)."
+        }
       }
     },
     "set_wallpaper": {
       "name": "Set wallpaper",
       "description": "Set the active menu wallpaper by filename.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "filename": { "name": "Filename", "description": "Wallpaper filename." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "filename": {
+          "name": "Filename",
+          "description": "Wallpaper filename."
+        }
       }
     },
     "set_background_mode": {
       "name": "Set background mode",
       "description": "Set the menu background mode (0-7).",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "mode": { "name": "Mode", "description": "Background mode 0-7." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "mode": {
+          "name": "Mode",
+          "description": "Background mode 0-7."
+        }
       }
     },
     "send_keyboard_raw": {
       "name": "Send raw keyboard",
       "description": "Send a raw uinput keyboard code to the MiSTer.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "code": { "name": "Code", "description": "uinput key code (0-255)." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "code": {
+          "name": "Code",
+          "description": "uinput key code (0-255)."
+        }
       }
     },
     "create_shortcut": {
       "name": "Create shortcut",
       "description": "Create an .mgl shortcut for a game and return its path.",
       "fields": {
-        "entry_id": { "name": "Entry ID", "description": "Config entry ID of the target MiSTer." },
-        "game_path": { "name": "Game path", "description": "Absolute path to the game file." },
-        "folder": { "name": "Folder", "description": "Destination menu folder (e.g. _@Favorites)." },
-        "name": { "name": "Name", "description": "Shortcut name (without extension)." }
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "game_path": {
+          "name": "Game path",
+          "description": "Absolute path to the game file."
+        },
+        "folder": {
+          "name": "Folder",
+          "description": "Destination menu folder (e.g. _@Favorites)."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Shortcut name (without extension)."
+        }
       }
     }
   }
