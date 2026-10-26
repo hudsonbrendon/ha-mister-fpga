@@ -43,14 +43,24 @@ buttons, video adjustments, and more.
   Run script, Launch system.
 - **Numbers** — Video brightness, contrast and saturation (edit the active MiSTer.ini).
 - **Services** — `launch_game`, `launch_system`, `search_games`, `send_keyboard`,
-  `take_screenshot`, `run_script`, `launch`, `launch_token`, `set_ini_value`,
-  `set_wallpaper`, `set_background_mode`, `send_keyboard_raw`, `create_shortcut`.
-- **Events** — fires `mister_fpga_game_changed` on the Home Assistant event bus when the
-  running core/game changes, enabling automations.
+  `take_screenshot`, `delete_screenshot`, `run_script`, `launch`, `launch_token`,
+  `set_ini_value`, `set_wallpaper`, `set_background_mode`, `send_keyboard_raw`,
+  `create_shortcut`, `send_command`, `gamepad_press`, `set_ra_debug`. The ones that can
+  launch files, run code or rewrite config are admin-only.
+- **Events** — `mister_fpga_game_changed` when the running core/game changes,
+  `mister_fpga_main_unresponsive` when Main hangs, and `mister_fpga_retroachievements`
+  for achievements, logins and game identification.
 - **Real-time updates** — subscribes to the mrext WebSocket for instant core/game/menu
-  changes and indexing status; polling is the fallback.
+  changes and indexing progress, and (with SSH) points mrext's `announce_game_url` at a
+  local webhook so every game change is pushed; polling is the fallback.
+- **Play stats** — play time today/total, games played, sessions, streaks and top game
+  from the mrext PlayLog service (Remote 0.5+).
+- **Discovery** — MiSTers advertising `_mister-remote._tcp` are found automatically.
 - **Optional SSH telemetry** — opt-in layer for true running core, uptime, RAM %, CPU
-  load (1m), and real firmware build date.
+  load (1m), real firmware build date, a **Main hung** problem sensor, volume/mute
+  control, Super Attract Mode state and the loaded game's ID.
+- **Optional gamepad** — Start/Select/A/B/Home buttons and a `gamepad_press` action via
+  the MiSTer Companion Remote daemon, auto-detected.
 - **Optional RetroAchievements cloud stats** — opt-in layer that fetches your RA account
   stats (hardcore/softcore points, global rank, current game progress, last achievement,
   and recent games) directly from the RetroAchievements Web API. Works without SSH and
@@ -65,7 +75,7 @@ All device communication — REST calls, WebSocket subscription, and SSH telemet
 handled by the standalone Python library
 [**python-mister-fpga**](https://github.com/hudsonbrendon/python-mister-fpga)
 ([PyPI](https://pypi.org/project/python-mister-fpga/)), which this integration declares
-as a runtime dependency (`python-mister-fpga==0.1.0`).
+as a runtime dependency (`python-mister-fpga==0.3.0`).
 
 The library can be installed and used independently of Home Assistant, making it easy to
 script or automate your MiSTer from any Python project. The integration itself focuses
@@ -110,6 +120,9 @@ changes.
 1. Go to **Settings → Devices & Services → Add Integration → MiSTer FPGA**.
 2. Enter the MiSTer's **host (IP address)** and **port** (default `8182`).
 
+MiSTers running a Remote that advertises `_mister-remote._tcp` over mDNS show up under
+**Discovered** — just confirm.
+
 You can later change the polling interval and SSH settings via **Configure** (options flow).
 
 ## Entities
@@ -118,7 +131,7 @@ You can later change the polling interval and SSH settings via **Configure** (op
 
 | Entity | Description |
 |--------|-------------|
-| `media_player.<name>` | MiSTer media player (receiver class). State: `off` when unreachable, `playing` while a core/game runs, `idle` in the menu. `source`/`source_list` are the installed systems; `select_source` launches a system. `play_media` launches a game by absolute path. |
+| `media_player.<name>` | MiSTer media player (receiver class). State: `off` when unreachable, `playing` while a core/game runs, `idle` in the menu. `source`/`source_list` are the installed systems; `select_source` launches a system. `play_media` launches a game by absolute path. With SSH: volume (0-7 on the MiSTer, mapped to 0-1) and mute, and the title falls back to the game Super Attract Mode is showing. |
 
 ### Binary sensors
 
@@ -127,15 +140,17 @@ You can later change the polling interval and SSH settings via **Configure** (op
 | `binary_sensor.<name>_online` | On while the mrext Remote service is reachable; off when the MiSTer is unreachable. |
 | `binary_sensor.<name>_game_running` | On while a game (not just a core) is running. |
 | `binary_sensor.<name>_background_music_active` | On while background music is playing. |
-| `binary_sensor.<name>_indexing` | On while the MiSTer is indexing games. |
+| `binary_sensor.<name>_indexing` | On while the MiSTer is indexing games. Attributes `total_steps`, `current_step`, `description` while it runs. |
+| `binary_sensor.<name>_main_unresponsive` | Problem sensor: on when Main_MiSTer left commands unread in `/dev/MiSTer_cmd` on two probes in a row (Main hung). (SSH) |
+| `binary_sensor.<name>_super_attract_mode_active` | On while MiSTer SAM is cycling games. (SSH) |
 
 ### Sensors
 
 | Entity | Description |
 |--------|-------------|
-| `sensor.<name>_core` | Running core |
+| `sensor.<name>_core` | Running core (attribute `core_session_time`, seconds, Remote 0.5+) |
 | `sensor.<name>_system` | Running system (friendly name) |
-| `sensor.<name>_game` | Running game, or `unknown` in the menu |
+| `sensor.<name>_game` | Running game, or `unknown` in the menu (attributes `game_session_time`, and `game_path` from push updates) |
 | `sensor.<name>_remote_version` | mrext **Remote** version (not MiSTer firmware) |
 | `sensor.<name>_hostname` | Device hostname |
 | `sensor.<name>_ip_address` | Device IP address |
@@ -154,6 +169,15 @@ You can later change the polling interval and SSH settings via **Configure** (op
 | `sensor.<name>_cpu_load` | CPU load 1m average (Optional — SSH) |
 | `sensor.<name>_memory_used` | Memory used % (Optional — SSH) |
 | `sensor.<name>_firmware_date` | MiSTer firmware build date (Optional — SSH) |
+| `sensor.<name>_main_open_file_descriptors` | Open file descriptors of the Main process; 1024 is the limit (Optional — SSH) |
+| `sensor.<name>_sam_game` | Game Super Attract Mode is showing (Optional — SSH) |
+| `sensor.<name>_game_id` | CRC32 or disc serial of the loaded game, needs `log_file_entry=1` (Optional — SSH) |
+| `sensor.<name>_play_time_today` | Play time today (PlayLog) |
+| `sensor.<name>_total_play_time` | Total play time (PlayLog) |
+| `sensor.<name>_games_played` | Games played (PlayLog) |
+| `sensor.<name>_play_sessions` | Play sessions (PlayLog) |
+| `sensor.<name>_current_streak` / `_longest_streak` | Days-in-a-row streaks (PlayLog) |
+| `sensor.<name>_top_game` | Most played game; attributes `top_games`, `top_systems` (PlayLog) |
 
 ### Select
 
@@ -161,7 +185,7 @@ You can later change the polling interval and SSH settings via **Configure** (op
 |--------|-------------|
 | `select.<name>_launch_system` | Options are the installed systems; selecting one launches it on the MiSTer. |
 | `select.<name>_active_ini` | Switch between MiSTer.ini profiles (1-4). |
-| `select.<name>_background_mode` | Set the menu background mode (0-7). |
+| `select.<name>_background_mode` | Menu background: none, wallpaper, horizontal bars 1/2, vertical bars 1/2, spectrum, black. |
 | `select.<name>_wallpaper` | Set the active menu wallpaper. |
 | `select.<name>_music_playlist` | Choose the active music playlist. |
 | `select.<name>_music_playback` | Set the music playback mode. |
@@ -186,6 +210,7 @@ You can later change the polling interval and SSH settings via **Configure** (op
 | `button.<name>_clear_wallpaper` | Clear the active menu wallpaper |
 | `button.<name>_framebuffer_console` | Toggle the framebuffer console |
 | `button.<name>_kill_script` | Kill the currently running script |
+| `button.<name>_gamepad_start` / `_select` / `_a` / `_b` / `_home` | Tap a virtual controller button (only when the Companion Remote daemon answers). |
 | `button.<name>_nav_*` | 23 navigation buttons: Up, Down, Left, Right, Confirm, Back, Cancel, Menu, OSD, Core select, User, Volume +/-, Mute, Reset, Screenshot, Raw screenshot, Console, Exit console, Computer OSD, Change background, Pair Bluetooth, Toggle core dates — each sends the corresponding keyboard control to the MiSTer. |
 
 ### Numbers
@@ -206,21 +231,26 @@ You can later change the polling interval and SSH settings via **Configure** (op
 
 | Service | Description |
 |---------|-------------|
-| `mister_fpga.launch_game` | Launch a game by its absolute file path on the MiSTer. |
+| `mister_fpga.launch_game` | Launch a game by its absolute file path on the MiSTer. (admin) |
 | `mister_fpga.launch_system` | Launch a core/system by its ID (e.g. `SNES`). |
-| `mister_fpga.search_games` | Search indexed games and return the results (response service). |
+| `mister_fpga.search_games` | Search indexed games; returns `{data, total, pageSize, page}`. Optional `page` (Remote 0.5 paginates). |
 | `mister_fpga.send_keyboard` | Send a named keyboard key to the MiSTer (e.g. `up`, `enter`, `escape`). |
 | `mister_fpga.take_screenshot` | Trigger a screenshot capture on the MiSTer. |
-| `mister_fpga.run_script` | Launch a script from the MiSTer Scripts folder by filename. |
-| `mister_fpga.launch` | Launch any game, core, .mra or .mgl by absolute path. |
-| `mister_fpga.launch_token` | Launch via base64url-encoded token data (NFC/QR format). |
-| `mister_fpga.set_ini_value` | Set a key in the active MiSTer.ini file. |
+| `mister_fpga.delete_screenshot` | Delete a screenshot (`core`, `filename`). |
+| `mister_fpga.run_script` | Launch a script from the MiSTer Scripts folder by filename. (admin) |
+| `mister_fpga.launch` | Launch any game, core, .mra or .mgl by absolute path. (admin) |
+| `mister_fpga.launch_token` | Launch an NFC/QR token in plain text, e.g. `**random:snes` (encoded for you). (admin) |
+| `mister_fpga.set_ini_value` | Set a key in the active MiSTer.ini file. (admin) |
 | `mister_fpga.set_wallpaper` | Set the active menu wallpaper by filename. |
-| `mister_fpga.set_background_mode` | Set the menu background mode (0-7). |
-| `mister_fpga.send_keyboard_raw` | Send a raw uinput keyboard code to the MiSTer (0-255). |
-| `mister_fpga.create_shortcut` | Create an .mgl shortcut for a game and return its path. |
+| `mister_fpga.set_background_mode` | Set the menu background mode: 0 none, 2 wallpaper, 4/6 horizontal bars, 8/10 vertical bars, 12 spectrum, 14 black. |
+| `mister_fpga.send_keyboard_raw` | Send a raw Linux evdev key code to the MiSTer (0-255). (admin) |
+| `mister_fpga.create_shortcut` | Create an .mgl shortcut for a game and return its path. (admin) |
+| `mister_fpga.send_command` | Write a command to Main's `/dev/MiSTer_cmd` FIFO, e.g. `load_core /media/fat/menu.rbf`. Fails instead of hanging when Main is stuck. (SSH, admin) |
+| `mister_fpga.gamepad_press` | Press a controller button (`a b x y l r select start home up down left right`) with action `tap`/`down`/`up`. (Companion Remote) |
+| `mister_fpga.set_ra_debug` | Turn the RetroAchievements debug log on/off; applies on the next core load. (SSH + RA, admin) |
 
 Each service takes an `entry_id` field — the config entry ID of the target MiSTer.
+Services marked *admin* refuse calls from non-admin users.
 
 ## Real-time updates
 
@@ -229,6 +259,12 @@ instant core/game/menu changes and indexing status updates. When the WebSocket d
 an event, entities are updated immediately without waiting for the next poll cycle.
 Polling remains active as a fallback for data not covered by WebSocket events (disk
 usage, peers, screenshots, SSH telemetry, etc.).
+
+With SSH enabled and **Instant game updates** on (the default), setup also writes
+`announce_game_url` in the `[remote]` section of `/media/fat/Scripts/remote.ini` to a
+local-only Home Assistant webhook (`<internal URL>/api/webhook/<id>`) and restarts the
+Remote once. mrext then posts every game launch, including the full `gamePath`. The
+file is only rewritten when the URL changed; other keys are kept.
 
 ## Optional: SSH telemetry
 
@@ -299,15 +335,27 @@ limits.
 ## Events
 
 The integration fires **`mister_fpga_game_changed`** on the Home Assistant event bus
-whenever the running core/game changes.
+whenever the running core/game changes (poll, WebSocket or push). It is not fired for
+the state found right after Home Assistant starts.
 
-Event data:
+Event data (`game_path` only when it came from a push update):
 
 ```yaml
 core: SNES
 system: Super Nintendo
 game: Chrono Trigger
+game_path: /media/fat/games/SNES/Chrono Trigger.sfc
 ```
+
+**`mister_fpga_main_unresponsive`** (SSH) fires once when Main stops draining its command
+FIFO, with `cmd_fifo_pending`, `main_open_fds` and `active_core`. A hung Main keeps the
+menu/core frozen while the Remote still answers, so nothing else in HA changes.
+
+**`mister_fpga_retroachievements`** (SSH + RA) carries one parsed line of odelot's RA
+debug log: `type` is `login` (`user`, `hardcore_points`, `softcore_points`),
+`game_identified` (`game_id`, `title`), `achievement` (`id`, `title`, `description`),
+`leaderboard` (`id`, `title`), `game_completed` or `game_unload`. Lines already in the
+log when HA starts are skipped.
 
 Example automation — notify when a new game starts:
 
@@ -321,6 +369,23 @@ automation:
       data:
         message: "Now playing on MiSTer: {{ trigger.event.data.game }}"
 ```
+
+## Advanced features and requirements
+
+| Feature | Needs |
+|---------|-------|
+| Main hung sensor/event, volume & mute, SAM sensors, game ID, open-FD sensor, `send_command` | SSH enabled in options |
+| Instant game updates (webhook) | SSH, **Instant game updates** option on, and an internal URL set in HA (**Settings → System → Network**) reachable from the MiSTer |
+| Gamepad buttons, `gamepad_press` | The MiSTer Companion Remote daemon by Anime0t4ku (`companion_remote.sh`, port `9191`). It serves one client at a time, so the integration connects only per press. Turn **Gamepad buttons** off in options to skip the probe. |
+| Play stats sensors | mrext **Remote 0.5+** with the **PlayLog** service running. Remote 0.4 has no PlayLog; the sensors are simply not created. |
+| `mister_fpga_retroachievements` events | SSH, odelot's RetroAchievements Main, and `debug=1` in `retroachievements.cfg` (`mister_fpga.set_ra_debug`, takes effect on the next core load) |
+| Session-time attributes | mrext Remote 0.5+ |
+
+> **Security:** mrext Remote has **no authentication** and answers every origin
+> (`Access-Control-Allow-Origin: *`): anything that can reach port `8182` — including a
+> web page open in a browser on your LAN — can launch files, run scripts and reboot the
+> MiSTer. **Never expose port 8182** to the internet or untrusted networks. The webhook
+> is registered `local_only`.
 
 ## Diagnostics
 
