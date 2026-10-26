@@ -37,6 +37,11 @@ _RA_LOG_CHUNK = 200_000
 _RA_LOG_MAX_READS = 64
 
 
+
+def _is_mac_junk(name: str | None) -> bool:
+    """macOS AppleDouble files (``._foo``) copied onto the SD card."""
+    return bool(name) and name.startswith("._")
+
 class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
     """Polls the MiSTer Remote API and exposes a MisterStatus to entities."""
 
@@ -134,7 +139,9 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
         """Apply an mrext ``announce_game_url`` push (see the webhook)."""
         data = self.data or MisterStatus(online=True)
         system = payload.get("system") or None
-        filename = payload.get("gameFilename") or None
+        game_path = payload.get("gamePath") or None
+        # With no game mrext sends gameFilename "." (filepath.Base of "").
+        filename = payload.get("gameFilename") if game_path else None
         new = replace(
             data,
             online=True,
@@ -144,7 +151,7 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
             game=f"{system}/{filename}" if system and filename else None,
             game_name=payload.get("gameName") or None,
         )
-        self.async_check_game_changed(new, payload.get("gamePath") or None)
+        self.async_check_game_changed(new, game_path)
         self.async_set_updated_data(new)
 
     async def async_refresh_ssh(self) -> None:
@@ -161,7 +168,9 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
         """Main is hung when the command FIFO stays non-empty on two probes."""
         pending = self.ssh_data.get("cmd_fifo_pending")
         was = self.main_unresponsive
-        self.main_unresponsive = bool(pending) and bool(self._fifo_pending_prev)
+        # -1 means the FIFO is missing (Main not running), not a backlog.
+        prev = self._fifo_pending_prev
+        self.main_unresponsive = (pending or 0) > 0 and (prev or 0) > 0
         self._fifo_pending_prev = pending
         if self.main_unresponsive and not was:
             self.hass.bus.async_fire(
@@ -229,6 +238,11 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
 
         wallpapers = await self._safe(self.client.async_get_wallpapers(), {})
         self.wallpapers = wallpapers if isinstance(wallpapers, dict) else {}
+        if isinstance(self.wallpapers.get("wallpapers"), list):
+            self.wallpapers["wallpapers"] = [
+                w for w in self.wallpapers["wallpapers"]
+                if not _is_mac_junk(w.get("filename"))
+            ]
         inis = await self._safe(self.client.async_get_inis(), {})
         self.inis = inis.get("inis", []) if isinstance(inis, dict) else []
         active = inis.get("active", 0) if isinstance(inis, dict) else 0
@@ -268,7 +282,8 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
     async def async_refresh_scripts(self) -> None:
         """Refresh the Scripts list (best-effort)."""
         data = await self._safe(self.client.async_get_scripts(), {})
-        self.scripts = data.get("scripts", []) if isinstance(data, dict) else []
+        scripts = data.get("scripts", []) if isinstance(data, dict) else []
+        self.scripts = [s for s in scripts if not _is_mac_junk(s.get("filename"))]
 
     async def async_refresh_systems(self) -> None:
         """Refresh the systems list (best-effort; errors are swallowed)."""
