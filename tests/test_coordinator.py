@@ -297,3 +297,37 @@ async def test_announce_updates_status_and_fires_event(hass):
     assert coordinator.game_path == "/media/fat/games/SNES/Chrono Trigger.sfc"
     assert len(events) == 1
     assert events[0].data["game_path"].endswith("Chrono Trigger.sfc")
+
+
+async def test_missing_fifo_is_not_a_hang(hass):
+    coordinator = MisterDataUpdateCoordinator(hass, AsyncMock(), 15)
+    coordinator.ssh = AsyncMock()
+    coordinator.ssh.async_probe.return_value = {"cmd_fifo_pending": -1}
+    await coordinator.async_refresh_ssh()
+    await coordinator.async_refresh_ssh()
+    assert coordinator.main_unresponsive is False
+
+
+async def test_mac_junk_files_are_hidden(hass):
+    client = AsyncMock()
+    client.async_get_scripts.return_value = {
+        "scripts": [
+            {"name": "._bgm", "filename": "._bgm.sh"},
+            {"name": "bgm", "filename": "bgm.sh"},
+        ],
+    }
+    coordinator = MisterDataUpdateCoordinator(hass, client, 15)
+    await coordinator.async_refresh_scripts()
+    assert [s["name"] for s in coordinator.scripts] == ["bgm"]
+
+
+async def test_core_only_announce_has_no_game(hass):
+    coordinator = MisterDataUpdateCoordinator(hass, AsyncMock(), 15)
+    coordinator.data = MisterStatus(online=True, core="GBC", game="GBC/a.gbc")
+    # mrext sends gameFilename "." (filepath.Base("")) when no game is loaded
+    coordinator.async_handle_announce(
+        {"core": "GBC", "system": "GameboyColor", "systemName": "Gameboy Color",
+         "gamePath": "", "gameFilename": ".", "gameName": ""}
+    )
+    assert coordinator.data.game is None
+    assert coordinator.data.system == "GameboyColor"
