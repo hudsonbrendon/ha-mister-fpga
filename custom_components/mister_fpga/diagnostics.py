@@ -8,10 +8,10 @@ from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import CONF_RA_API_KEY, CONF_SSH_PASSWORD, DOMAIN
+from .const import CONF_RA_API_KEY, CONF_SSH_PASSWORD, CONF_WEBHOOK_ID, DOMAIN
 from .coordinator import MisterDataUpdateCoordinator
 
-TO_REDACT = {CONF_SSH_PASSWORD, CONF_RA_API_KEY}
+TO_REDACT = {CONF_SSH_PASSWORD, CONF_RA_API_KEY, CONF_WEBHOOK_ID}
 
 
 def _ra_web_diagnostics(coordinator) -> dict | None:
@@ -44,7 +44,12 @@ async def async_get_config_entry_diagnostics(
             "scripts": [s.get("filename") for s in coordinator.scripts],
             "menu_path": coordinator.menu_path,
             "indexing": coordinator.indexing,
+            "game_path": coordinator.game_path,
+            "playlog": coordinator.playlog,
+            "playlog_today": coordinator.playlog_today,
         },
+        "gamepad_available": coordinator.gamepad is not None,
+        "main_unresponsive": coordinator.main_unresponsive,
         "ssh_enabled": coordinator.ssh is not None,
         "ssh_data": coordinator.ssh_data,
         "retroachievements": (

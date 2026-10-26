@@ -9,6 +9,10 @@
           "host": "Host or IP address",
           "port": "Port"
         }
+      },
+      "zeroconf_confirm": {
+        "title": "MiSTer FPGA",
+        "description": "Add the MiSTer {name} found at {host}?"
       }
     },
     "error": {
@@ -16,7 +20,8 @@
     },
     "abort": {
       "already_configured": "This MiSTer is already configured."
-    }
+    },
+    "flow_title": "{name}"
   },
   "options": {
     "step": {
@@ -30,7 +35,13 @@
           "ssh_port": "SSH port",
           "ra_username": "RetroAchievements username",
           "ra_api_key": "RetroAchievements Web API key",
-          "ra_cloud_interval": "RetroAchievements poll interval (seconds)"
+          "ra_cloud_interval": "RetroAchievements poll interval (seconds)",
+          "push_updates": "Instant game updates (needs SSH)",
+          "gamepad_enabled": "Gamepad buttons (Companion Remote)"
+        },
+        "data_description": {
+          "push_updates": "Writes announce_game_url to /media/fat/Scripts/remote.ini over SSH so the Remote pushes every game change to a local Home Assistant webhook, then restarts the Remote.",
+          "gamepad_enabled": "Adds gamepad buttons and the gamepad_press action when the MiSTer Companion Remote daemon (port 9191) answers."
         }
       }
     },
@@ -54,6 +65,12 @@
       },
       "ra_game_supported": {
         "name": "RetroAchievements Game Supported"
+      },
+      "main_unresponsive": {
+        "name": "Main unresponsive"
+      },
+      "sam_active": {
+        "name": "Super Attract Mode active"
       }
     },
     "sensor": {
@@ -149,6 +166,36 @@
       },
       "ra_recent_games": {
         "name": "RA Recent Games"
+      },
+      "main_open_fds": {
+        "name": "Main open file descriptors"
+      },
+      "sam_game": {
+        "name": "SAM game"
+      },
+      "game_id": {
+        "name": "Game ID"
+      },
+      "playtime_today": {
+        "name": "Play time today"
+      },
+      "playtime_total": {
+        "name": "Total play time"
+      },
+      "games_played": {
+        "name": "Games played"
+      },
+      "play_sessions": {
+        "name": "Play sessions"
+      },
+      "current_streak": {
+        "name": "Current streak"
+      },
+      "longest_streak": {
+        "name": "Longest streak"
+      },
+      "top_game": {
+        "name": "Top game"
       }
     },
     "button": {
@@ -247,6 +294,21 @@
       },
       "nav_toggle_core_dates": {
         "name": "Nav toggle core dates"
+      },
+      "gamepad_start": {
+        "name": "Gamepad: Start"
+      },
+      "gamepad_select": {
+        "name": "Gamepad: Select"
+      },
+      "gamepad_a": {
+        "name": "Gamepad: A"
+      },
+      "gamepad_b": {
+        "name": "Gamepad: B"
+      },
+      "gamepad_home": {
+        "name": "Gamepad: Home"
       }
     },
     "select": {
@@ -257,7 +319,17 @@
         "name": "Active INI"
       },
       "background_mode": {
-        "name": "Background mode"
+        "name": "Background mode",
+        "state": {
+          "none": "None",
+          "wallpaper": "Wallpaper",
+          "hbars1": "Horizontal bars 1",
+          "hbars2": "Horizontal bars 2",
+          "vbars1": "Vertical bars 1",
+          "vbars2": "Vertical bars 2",
+          "spectrum": "Spectrum",
+          "black": "Black"
+        }
       },
       "wallpaper": {
         "name": "Wallpaper"
@@ -347,6 +419,10 @@
         "system": {
           "name": "System",
           "description": "Restrict to a system ID (default: all)."
+        },
+        "page": {
+          "name": "Page",
+          "description": "1-based result page (Remote 0.5 paginates)."
         }
       }
     },
@@ -404,7 +480,7 @@
     },
     "launch_token": {
       "name": "Launch token",
-      "description": "Launch base64url-encoded token data (NFC/QR format).",
+      "description": "Launch a token in plain text, as written to an NFC tag or QR code: a path or a command such as **random:snes.",
       "fields": {
         "entry_id": {
           "name": "Entry ID",
@@ -412,7 +488,7 @@
         },
         "data": {
           "name": "Data",
-          "description": "base64url-encoded launch data."
+          "description": "Token text, e.g. **random:snes or _Console/SNES. Encoded for you."
         }
       }
     },
@@ -450,7 +526,7 @@
     },
     "set_background_mode": {
       "name": "Set background mode",
-      "description": "Set the menu background mode (0-7).",
+      "description": "Set the menu background mode: 0 none, 2 wallpaper, 4/6 horizontal bars, 8/10 vertical bars, 12 spectrum, 14 black.",
       "fields": {
         "entry_id": {
           "name": "Entry ID",
@@ -458,7 +534,7 @@
         },
         "mode": {
           "name": "Mode",
-          "description": "Background mode 0-7."
+          "description": "Even value 0-14."
         }
       }
     },
@@ -495,6 +571,70 @@
         "name": {
           "name": "Name",
           "description": "Shortcut name (without extension)."
+        }
+      }
+    },
+    "delete_screenshot": {
+      "name": "Delete screenshot",
+      "description": "Delete one saved screenshot.",
+      "fields": {
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "core": {
+          "name": "Core",
+          "description": "Core folder of the screenshot, e.g. SNES."
+        },
+        "filename": {
+          "name": "Filename",
+          "description": "Screenshot filename."
+        }
+      }
+    },
+    "send_command": {
+      "name": "Send MiSTer command",
+      "description": "Write one command to Main's /dev/MiSTer_cmd FIFO over SSH (needs SSH). Fails instead of hanging when Main is stuck.",
+      "fields": {
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "command": {
+          "name": "Command",
+          "description": "e.g. load_core /media/fat/menu.rbf, volume 5, screenshot."
+        }
+      }
+    },
+    "gamepad_press": {
+      "name": "Gamepad press",
+      "description": "Press a virtual controller button through the MiSTer Companion Remote daemon.",
+      "fields": {
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "button": {
+          "name": "Button",
+          "description": "Controller button or D-pad direction."
+        },
+        "action": {
+          "name": "Action",
+          "description": "tap (short press), down or up. A held button is released when the call ends."
+        }
+      }
+    },
+    "set_ra_debug": {
+      "name": "Set RetroAchievements debug log",
+      "description": "Turn odelot's RetroAchievements debug log on or off (needs SSH). It feeds the mister_fpga_retroachievements events and applies on the next core load.",
+      "fields": {
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "Config entry ID of the target MiSTer."
+        },
+        "enabled": {
+          "name": "Enabled",
+          "description": "Write debug=1 (on) or debug=0 (off) to retroachievements.cfg."
         }
       }
     }

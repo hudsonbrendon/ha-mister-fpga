@@ -57,7 +57,7 @@ async def test_background_mode_select(hass, init_integration):
     ) as mock:
         await hass.services.async_call(
             "select", "select_option",
-            {"entity_id": "select.mister_fpga_background_mode", "option": "Wallpaper"},
+            {"entity_id": "select.mister_fpga_background_mode", "option": "wallpaper"},
             blocking=True,
         )
     mock.assert_awaited_once_with(2)
@@ -81,3 +81,16 @@ async def test_active_ini_select(hass, init_integration):
             blocking=True,
         )
     mock.assert_awaited_once_with(2)
+
+
+async def test_background_mode_options_and_current(hass, init_integration):
+    entry, coordinator = await init_integration()
+    coordinator.wallpapers = {"backgroundMode": 12}
+    coordinator.async_set_updated_data(coordinator.data)
+    await hass.async_block_till_done()
+    state = hass.states.get("select.mister_fpga_background_mode")
+    assert state.attributes["options"] == [
+        "none", "wallpaper", "hbars1", "hbars2", "vbars1", "vbars2",
+        "spectrum", "black",
+    ]
+    assert state.state == "spectrum"

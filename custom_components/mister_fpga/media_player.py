@@ -12,7 +12,10 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from mister_fpga import MisterMainUnresponsiveError
 
 from .const import DOMAIN
 from .entity import MisterEntity
@@ -32,14 +35,19 @@ class MisterMediaPlayer(MisterEntity, MediaPlayerEntity):
 
     _attr_name = None
     _attr_device_class = MediaPlayerDeviceClass.RECEIVER
-    _attr_supported_features = (
-        MediaPlayerEntityFeature.SELECT_SOURCE
-        | MediaPlayerEntityFeature.PLAY_MEDIA
-    )
 
     def __init__(self, coordinator, entry) -> None:
         super().__init__(coordinator, entry)
         self._attr_unique_id = f"{entry.entry_id}_media_player"
+        self._attr_supported_features = (
+            MediaPlayerEntityFeature.SELECT_SOURCE
+            | MediaPlayerEntityFeature.PLAY_MEDIA
+        )
+        if coordinator.ssh is not None:  # volume goes through Main's FIFO
+            self._attr_supported_features |= (
+                MediaPlayerEntityFeature.VOLUME_SET
+                | MediaPlayerEntityFeature.VOLUME_MUTE
+            )
 
     @property
     def state(self) -> MediaPlayerState:
@@ -61,7 +69,36 @@ class MisterMediaPlayer(MisterEntity, MediaPlayerEntity):
         data = self.coordinator.data
         if not data:
             return None
-        return data.game_name or data.core
+        ssh = self.coordinator.ssh_data
+        # The Remote never reports what SAM is showing.
+        sam_game = ssh.get("sam_game") if ssh.get("sam_active") else None
+        return data.game_name or sam_game or data.core
+
+    @property
+    def volume_level(self) -> float | None:
+        volume = self.coordinator.ssh_data.get("volume")
+        return volume / 7 if volume is not None else None
+
+    @property
+    def is_volume_muted(self) -> bool | None:
+        return self.coordinator.ssh_data.get("muted")
+
+    async def async_set_volume_level(self, volume: float) -> None:
+        level = round(volume * 7)
+        await self._ssh_call(self.coordinator.ssh.async_set_volume(level))
+        self.coordinator.ssh_data["volume"] = level
+        self.async_write_ha_state()
+
+    async def async_mute_volume(self, mute: bool) -> None:
+        await self._ssh_call(self.coordinator.ssh.async_set_mute(mute))
+        self.coordinator.ssh_data["muted"] = mute
+        self.async_write_ha_state()
+
+    async def _ssh_call(self, coro) -> None:
+        try:
+            await coro
+        except MisterMainUnresponsiveError as err:
+            raise HomeAssistantError(f"MiSTer Main is not responding: {err}") from err
 
     @property
     def app_name(self) -> str | None:

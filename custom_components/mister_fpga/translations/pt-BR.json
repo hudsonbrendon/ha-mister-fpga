@@ -9,6 +9,10 @@
           "host": "Host ou endereço IP",
           "port": "Porta"
         }
+      },
+      "zeroconf_confirm": {
+        "title": "MiSTer FPGA",
+        "description": "Adicionar o MiSTer {name} encontrado em {host}?"
       }
     },
     "error": {
@@ -16,7 +20,8 @@
     },
     "abort": {
       "already_configured": "Este MiSTer já está configurado."
-    }
+    },
+    "flow_title": "{name}"
   },
   "options": {
     "step": {
@@ -30,7 +35,13 @@
           "ssh_port": "Porta SSH",
           "ra_username": "Usuário RetroAchievements",
           "ra_api_key": "Chave da Web API RetroAchievements",
-          "ra_cloud_interval": "Intervalo de atualização RetroAchievements (segundos)"
+          "ra_cloud_interval": "Intervalo de atualização RetroAchievements (segundos)",
+          "push_updates": "Atualizações instantâneas de jogo (requer SSH)",
+          "gamepad_enabled": "Botões de gamepad (Companion Remote)"
+        },
+        "data_description": {
+          "push_updates": "Grava announce_game_url em /media/fat/Scripts/remote.ini via SSH para o Remote avisar cada troca de jogo num webhook local do Home Assistant, e reinicia o Remote.",
+          "gamepad_enabled": "Adiciona botões de gamepad e a ação gamepad_press quando o daemon MiSTer Companion Remote (porta 9191) responde."
         }
       }
     },
@@ -54,6 +65,12 @@
       },
       "ra_game_supported": {
         "name": "Jogo Suporta RetroAchievements"
+      },
+      "main_unresponsive": {
+        "name": "Main travado"
+      },
+      "sam_active": {
+        "name": "Super Attract Mode ativo"
       }
     },
     "sensor": {
@@ -149,6 +166,36 @@
       },
       "ra_recent_games": {
         "name": "RA Jogos Recentes"
+      },
+      "main_open_fds": {
+        "name": "Descritores abertos do Main"
+      },
+      "sam_game": {
+        "name": "Jogo do SAM"
+      },
+      "game_id": {
+        "name": "ID do jogo"
+      },
+      "playtime_today": {
+        "name": "Tempo de jogo hoje"
+      },
+      "playtime_total": {
+        "name": "Tempo de jogo total"
+      },
+      "games_played": {
+        "name": "Jogos jogados"
+      },
+      "play_sessions": {
+        "name": "Sessões de jogo"
+      },
+      "current_streak": {
+        "name": "Sequência atual"
+      },
+      "longest_streak": {
+        "name": "Maior sequência"
+      },
+      "top_game": {
+        "name": "Jogo mais jogado"
       }
     },
     "button": {
@@ -247,6 +294,21 @@
       },
       "nav_toggle_core_dates": {
         "name": "Nav alternar datas dos cores"
+      },
+      "gamepad_start": {
+        "name": "Gamepad: Start"
+      },
+      "gamepad_select": {
+        "name": "Gamepad: Select"
+      },
+      "gamepad_a": {
+        "name": "Gamepad: A"
+      },
+      "gamepad_b": {
+        "name": "Gamepad: B"
+      },
+      "gamepad_home": {
+        "name": "Gamepad: Home"
       }
     },
     "select": {
@@ -257,7 +319,17 @@
         "name": "INI ativo"
       },
       "background_mode": {
-        "name": "Modo de fundo"
+        "name": "Modo de fundo",
+        "state": {
+          "none": "Nenhum",
+          "wallpaper": "Wallpaper",
+          "hbars1": "Barras horizontais 1",
+          "hbars2": "Barras horizontais 2",
+          "vbars1": "Barras verticais 1",
+          "vbars2": "Barras verticais 2",
+          "spectrum": "Espectro",
+          "black": "Preto"
+        }
       },
       "wallpaper": {
         "name": "Wallpaper"
@@ -347,6 +419,10 @@
         "system": {
           "name": "Sistema",
           "description": "Restringe a um ID de sistema (padrão: todos)."
+        },
+        "page": {
+          "name": "Página",
+          "description": "Página de resultados, começando em 1 (Remote 0.5 pagina)."
         }
       }
     },
@@ -404,7 +480,7 @@
     },
     "launch_token": {
       "name": "Iniciar token",
-      "description": "Inicia dados de token em base64url (formato NFC/QR).",
+      "description": "Inicia um token em texto puro, como gravado numa tag NFC ou QR code: um caminho ou um comando como **random:snes.",
       "fields": {
         "entry_id": {
           "name": "ID da entrada",
@@ -412,7 +488,7 @@
         },
         "data": {
           "name": "Dados",
-          "description": "Dados de launch em base64url."
+          "description": "Texto do token, ex.: **random:snes ou _Console/SNES. A codificação é feita para você."
         }
       }
     },
@@ -450,7 +526,7 @@
     },
     "set_background_mode": {
       "name": "Definir modo de fundo",
-      "description": "Define o modo de fundo do menu (0-7).",
+      "description": "Define o modo de fundo do menu: 0 nenhum, 2 wallpaper, 4/6 barras horizontais, 8/10 barras verticais, 12 espectro, 14 preto.",
       "fields": {
         "entry_id": {
           "name": "ID da entrada",
@@ -458,7 +534,7 @@
         },
         "mode": {
           "name": "Modo",
-          "description": "Modo de fundo 0-7."
+          "description": "Valor par de 0 a 14."
         }
       }
     },
@@ -495,6 +571,70 @@
         "name": {
           "name": "Nome",
           "description": "Nome do atalho (sem extensão)."
+        }
+      }
+    },
+    "delete_screenshot": {
+      "name": "Apagar screenshot",
+      "description": "Apaga um screenshot salvo.",
+      "fields": {
+        "entry_id": {
+          "name": "ID da entrada",
+          "description": "ID da config entry do MiSTer alvo."
+        },
+        "core": {
+          "name": "Core",
+          "description": "Pasta do core do screenshot, ex.: SNES."
+        },
+        "filename": {
+          "name": "Arquivo",
+          "description": "Nome do arquivo do screenshot."
+        }
+      }
+    },
+    "send_command": {
+      "name": "Enviar comando ao MiSTer",
+      "description": "Escreve um comando no FIFO /dev/MiSTer_cmd do Main via SSH (requer SSH). Falha em vez de travar quando o Main está travado.",
+      "fields": {
+        "entry_id": {
+          "name": "ID da entrada",
+          "description": "ID da config entry do MiSTer alvo."
+        },
+        "command": {
+          "name": "Comando",
+          "description": "ex.: load_core /media/fat/menu.rbf, volume 5, screenshot."
+        }
+      }
+    },
+    "gamepad_press": {
+      "name": "Apertar botão do gamepad",
+      "description": "Aperta um botão do controle virtual pelo daemon MiSTer Companion Remote.",
+      "fields": {
+        "entry_id": {
+          "name": "ID da entrada",
+          "description": "ID da config entry do MiSTer alvo."
+        },
+        "button": {
+          "name": "Botão",
+          "description": "Botão do controle ou direção do D-pad."
+        },
+        "action": {
+          "name": "Ação",
+          "description": "tap (toque curto), down ou up. Um botão segurado é solto quando a chamada termina."
+        }
+      }
+    },
+    "set_ra_debug": {
+      "name": "Definir log de depuração do RetroAchievements",
+      "description": "Liga ou desliga o log de depuração do RetroAchievements do odelot (requer SSH). Ele alimenta os eventos mister_fpga_retroachievements e vale a partir do próximo carregamento de core.",
+      "fields": {
+        "entry_id": {
+          "name": "ID da entrada",
+          "description": "ID da config entry do MiSTer alvo."
+        },
+        "enabled": {
+          "name": "Ativado",
+          "description": "Grava debug=1 (ligado) ou debug=0 (desligado) no retroachievements.cfg."
         }
       }
     }

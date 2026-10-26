@@ -7,6 +7,7 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from mister_fpga import RA_SUPPORTED_SYSTEMS
@@ -29,6 +30,9 @@ async def async_setup_entry(
         MisterBgmActiveSensor(coordinator, entry),
         MisterIndexingSensor(coordinator, entry),
     ]
+    if coordinator.ssh is not None:
+        entities.append(MisterMainUnresponsiveSensor(coordinator, entry))
+        entities.append(MisterSamActiveSensor(coordinator, entry))
     ra_data = getattr(coordinator, "ra_data", None)
     if ra_data is not None and ra_data.installed:
         entities.append(MisterRAGameSupportedSensor(coordinator, entry))
@@ -88,6 +92,53 @@ class MisterIndexingSensor(MisterEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         return bool(self.coordinator.indexing)
+
+    @property
+    def extra_state_attributes(self) -> dict | None:
+        idx = self.coordinator.index_status
+        if idx is None:
+            return None
+        return {
+            "total_steps": idx.total_steps,
+            "current_step": idx.current_step,
+            "description": idx.description,
+        }
+
+
+class MisterMainUnresponsiveSensor(MisterEntity, BinarySensorEntity):
+    """On when Main_MiSTer stopped reading its command FIFO (SSH)."""
+
+    _attr_translation_key = "main_unresponsive"
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = f"{entry.entry_id}_main_unresponsive"
+
+    @property
+    def is_on(self) -> bool:
+        return self.coordinator.main_unresponsive
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {"cmd_fifo_pending": self.coordinator.ssh_data.get("cmd_fifo_pending")}
+
+
+class MisterSamActiveSensor(MisterEntity, BinarySensorEntity):
+    """On while MiSTer Super Attract Mode is cycling games (SSH)."""
+
+    _attr_translation_key = "sam_active"
+    _attr_device_class = BinarySensorDeviceClass.RUNNING
+    _attr_icon = "mdi:television-play"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = f"{entry.entry_id}_sam_active"
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.coordinator.ssh_data.get("sam_active"))
 
 
 class MisterRAGameSupportedSensor(MisterEntity, BinarySensorEntity):

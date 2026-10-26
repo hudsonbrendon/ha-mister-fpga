@@ -13,6 +13,9 @@ def _make_coordinator():
     coord.ra = None
     coord.ra_data = None
     coord.ssh_data = {}
+    coord.main_unresponsive = False
+    coord._fifo_pending_prev = None
+    coord._ra_log_offset = None
     return coord
 
 

@@ -6,14 +6,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import BACKGROUND_MODES, DOMAIN
 from .entity import MisterEntity
 
-BACKGROUND_MODES = {
-    "None": 0, "Logo": 1, "Wallpaper": 2, "Custom 1": 3,
-    "Custom 2": 4, "Custom 3": 5, "Custom 4": 6, "Custom 5": 7,
-}
-_BG_BY_VALUE = {v: k for k, v in BACKGROUND_MODES.items()}
+_BG_BY_NAME = {name: mode for mode, name in BACKGROUND_MODES.items()}
 MUSIC_PLAYBACK_MODES = ["random", "loop", "disabled"]
 
 
@@ -98,7 +94,7 @@ class MisterActiveIniSelect(MisterEntity, SelectEntity):
 class MisterBackgroundModeSelect(MisterEntity, SelectEntity):
     _attr_translation_key = "background_mode"
     _attr_icon = "mdi:image-frame"
-    _attr_options = list(BACKGROUND_MODES)
+    _attr_options = list(_BG_BY_NAME)
 
     def __init__(self, coordinator, entry) -> None:
         super().__init__(coordinator, entry)
@@ -107,12 +103,10 @@ class MisterBackgroundModeSelect(MisterEntity, SelectEntity):
     @property
     def current_option(self) -> str | None:
         mode = self.coordinator.wallpapers.get("backgroundMode")
-        return _BG_BY_VALUE.get(mode)
+        return BACKGROUND_MODES.get(mode)
 
     async def async_select_option(self, option: str) -> None:
-        await self.coordinator.client.async_set_background_mode(
-            BACKGROUND_MODES[option]
-        )
+        await self.coordinator.client.async_set_background_mode(_BG_BY_NAME[option])
         await self.coordinator.async_request_refresh_full()
 
 

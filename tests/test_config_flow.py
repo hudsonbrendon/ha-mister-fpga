@@ -43,3 +43,52 @@ async def test_user_flow_cannot_connect(hass):
         )
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "cannot_connect"}
+
+
+def _zeroconf_info(host="192.168.31.77"):
+    import types
+
+    return types.SimpleNamespace(
+        host=host,
+        port=8182,
+        hostname="MiSTer.local.",
+        name="MiSTer._mister-remote._tcp.local.",
+        type="_mister-remote._tcp.local.",
+        properties={},
+    )
+
+
+async def test_zeroconf_discovery_creates_entry(hass):
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "zeroconf"}, data=_zeroconf_info()
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "zeroconf_confirm"
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["title"] == "MiSTer"
+    assert result["data"] == {
+        CONF_NAME: "MiSTer", CONF_HOST: "192.168.31.77", CONF_PORT: 8182,
+    }
+    assert result["result"].unique_id == "192.168.31.77"
+
+
+async def test_zeroconf_aborts_when_configured(hass):
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+    MockConfigEntry(
+        domain=DOMAIN, unique_id="MiSTer.local", data={CONF_HOST: "MiSTer.local"}
+    ).add_to_hass(hass)
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "zeroconf"}, data=_zeroconf_info()
+    )
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
+
+    MockConfigEntry(
+        domain=DOMAIN, unique_id="192.168.31.77", data={CONF_HOST: "192.168.31.77"}
+    ).add_to_hass(hass)
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "zeroconf"}, data=_zeroconf_info()
+    )
+    assert result["type"] is FlowResultType.ABORT
