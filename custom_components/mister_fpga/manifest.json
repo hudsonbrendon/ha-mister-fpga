@@ -8,7 +8,7 @@
   "integration_type": "device",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/hudsonbrendon/ha-mister-fpga/issues",
-  "requirements": ["python-mister-fpga==0.3.1"],
+  "requirements": ["python-mister-fpga==0.3.2"],
   "version": "0.6.0",
   "zeroconf": ["_mister-remote._tcp.local."]
 }
