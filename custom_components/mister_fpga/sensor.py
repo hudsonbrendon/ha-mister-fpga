@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfInformation
+from homeassistant.const import PERCENTAGE, UnitOfInformation, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -31,6 +31,7 @@ class MisterSensorEntityDescription(SensorEntityDescription):
     coordinator_fn: (
         Callable[[MisterDataUpdateCoordinator], str | int | float | None] | None
     ) = None
+    attrs_fn: Callable[[MisterDataUpdateCoordinator], dict] | None = None
 
 
 def _ts_to_datetime(ts):
@@ -56,6 +57,9 @@ SENSORS: tuple[MisterSensorEntityDescription, ...] = (
         translation_key="core",
         icon="mdi:chip",
         value_fn=lambda s: s.core,
+        attrs_fn=lambda c: {
+            "core_session_time": c.data.core_session_time if c.data else None
+        },
     ),
     MisterSensorEntityDescription(
         key="system",
@@ -68,6 +72,10 @@ SENSORS: tuple[MisterSensorEntityDescription, ...] = (
         translation_key="game",
         icon="mdi:disc",
         value_fn=lambda s: s.game_name,
+        attrs_fn=lambda c: {
+            "game_session_time": c.data.game_session_time if c.data else None,
+            "game_path": c.game_path,
+        },
     ),
     MisterSensorEntityDescription(
         key="remote_version",
@@ -200,6 +208,106 @@ SENSORS: tuple[MisterSensorEntityDescription, ...] = (
 )
 
 
+# Only meaningful with SSH: Main health, SAM and the loaded game's ID.
+SSH_SENSORS: tuple[MisterSensorEntityDescription, ...] = (
+    MisterSensorEntityDescription(
+        key="main_open_fds",
+        translation_key="main_open_fds",
+        icon="mdi:file-multiple",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        state_class=SensorStateClass.MEASUREMENT,
+        coordinator_fn=lambda c: c.ssh_data.get("main_open_fds"),
+    ),
+    MisterSensorEntityDescription(
+        key="sam_game",
+        translation_key="sam_game",
+        icon="mdi:television-play",
+        coordinator_fn=lambda c: c.ssh_data.get("sam_game"),
+    ),
+    MisterSensorEntityDescription(
+        key="game_id",
+        translation_key="game_id",
+        icon="mdi:identifier",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        coordinator_fn=lambda c: c.ssh_data.get("game_id"),
+    ),
+)
+
+
+def _playlog(c, key):
+    return c.playlog.get(key) if c.playlog else None
+
+
+def _top_game(c):
+    top = _playlog(c, "topGames") or []
+    if not top or not isinstance(top[0], dict):
+        return None
+    return top[0].get("name") or top[0].get("gameName") or top[0].get("game")
+
+
+def _duration(key, translation_key, icon, value_fn, suggested_unit):
+    return MisterSensorEntityDescription(
+        key=key,
+        translation_key=translation_key,
+        icon=icon,
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        suggested_unit_of_measurement=suggested_unit,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        coordinator_fn=value_fn,
+    )
+
+
+PLAYLOG_SENSORS: tuple[MisterSensorEntityDescription, ...] = (
+    _duration(
+        "playtime_today", "playtime_today", "mdi:timer-play",
+        lambda c: c.playlog_today, UnitOfTime.MINUTES,
+    ),
+    _duration(
+        "playtime_total", "playtime_total", "mdi:timer-sand-complete",
+        lambda c: _playlog(c, "totalTime"), UnitOfTime.HOURS,
+    ),
+    MisterSensorEntityDescription(
+        key="games_played",
+        translation_key="games_played",
+        icon="mdi:gamepad-square",
+        state_class=SensorStateClass.TOTAL,
+        coordinator_fn=lambda c: _playlog(c, "gamesPlayed"),
+    ),
+    MisterSensorEntityDescription(
+        key="play_sessions",
+        translation_key="play_sessions",
+        icon="mdi:counter",
+        state_class=SensorStateClass.TOTAL,
+        coordinator_fn=lambda c: _playlog(c, "sessions"),
+    ),
+    MisterSensorEntityDescription(
+        key="current_streak",
+        translation_key="current_streak",
+        icon="mdi:fire",
+        native_unit_of_measurement=UnitOfTime.DAYS,
+        coordinator_fn=lambda c: _playlog(c, "currentStreak"),
+    ),
+    MisterSensorEntityDescription(
+        key="longest_streak",
+        translation_key="longest_streak",
+        icon="mdi:trophy-award",
+        native_unit_of_measurement=UnitOfTime.DAYS,
+        coordinator_fn=lambda c: _playlog(c, "longestStreak"),
+    ),
+    MisterSensorEntityDescription(
+        key="top_game",
+        translation_key="top_game",
+        icon="mdi:star",
+        coordinator_fn=_top_game,
+        attrs_fn=lambda c: {
+            "top_games": _playlog(c, "topGames") or [],
+            "top_systems": _playlog(c, "topSystems") or [],
+        },
+    ),
+)
+
+
 def _ra(coordinator):
     return getattr(coordinator, "ra_data", None)
 
@@ -251,6 +359,10 @@ async def async_setup_entry(
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id]
     descriptions = list(SENSORS)
+    if coordinator.ssh is not None:
+        descriptions.extend(SSH_SENSORS)
+    if coordinator.playlog is not None:
+        descriptions.extend(PLAYLOG_SENSORS)
     ra_data = getattr(coordinator, "ra_data", None)
     if ra_data is not None and ra_data.installed:
         descriptions.extend(RA_SENSORS)
@@ -281,3 +393,8 @@ class MisterSensor(MisterEntity, SensorEntity):
         if self.coordinator.data is None:
             return None
         return desc.value_fn(self.coordinator.data)
+
+    @property
+    def extra_state_attributes(self) -> dict | None:
+        fn = self.entity_description.attrs_fn
+        return fn(self.coordinator) if fn is not None else None

@@ -37,6 +37,13 @@ search_games:
       example: "SNES"
       selector:
         text:
+    page:
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 10000
+          mode: box
 
 send_keyboard:
   fields:
@@ -70,7 +77,7 @@ launch:
 launch_token:
   fields:
     entry_id: {required: true, selector: {text: {}}}
-    data: {required: true, example: "bWVudS5yYmY=", selector: {text: {}}}
+    data: {required: true, example: "**random:snes", selector: {text: {}}}
 
 set_ini_value:
   fields:
@@ -86,7 +93,7 @@ set_wallpaper:
 set_background_mode:
   fields:
     entry_id: {required: true, selector: {text: {}}}
-    mode: {required: true, selector: {number: {min: 0, max: 7, mode: box}}}
+    mode: {required: true, example: 2, selector: {number: {min: 0, max: 14, step: 2, mode: box}}}
 
 send_keyboard_raw:
   fields:
@@ -99,3 +106,34 @@ create_shortcut:
     game_path: {required: true, selector: {text: {}}}
     folder: {required: true, example: "_@Favorites", selector: {text: {}}}
     name: {required: true, selector: {text: {}}}
+
+delete_screenshot:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    core: {required: true, example: "SNES", selector: {text: {}}}
+    filename: {required: true, example: "20260101_120000-Chrono.png", selector: {text: {}}}
+
+send_command:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    command: {required: true, example: "load_core /media/fat/menu.rbf", selector: {text: {}}}
+
+gamepad_press:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    button:
+      required: true
+      example: "start"
+      selector:
+        select:
+          options: [a, b, x, y, l, r, select, start, home, up, down, left, right]
+    action:
+      default: "tap"
+      selector:
+        select:
+          options: [tap, down, up]
+
+set_ra_debug:
+  fields:
+    entry_id: {required: true, selector: {text: {}}}
+    enabled: {required: true, selector: {boolean: {}}}

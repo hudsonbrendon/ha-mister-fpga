@@ -53,20 +53,24 @@ async def test_send_keyboard_service(hass, init_integration):
 
 async def test_search_games_service_returns_response(hass, init_integration):
     entry, coordinator = await init_integration()
-    payload = {"data": [{"name": "Chrono Trigger"}], "total": 1}
+    payload = {
+        "data": [{"name": "Chrono Trigger"}], "total": 1, "pageSize": 50, "page": 2,
+    }
     with patch.object(
         coordinator.client,
         "async_search_games",
         new=AsyncMock(return_value=payload),
-    ):
+    ) as mock:
         response = await hass.services.async_call(
             DOMAIN,
             "search_games",
-            {"entry_id": entry.entry_id, "query": "chrono"},
+            {"entry_id": entry.entry_id, "query": "chrono", "page": 2},
             blocking=True,
             return_response=True,
         )
     assert response["total"] == 1
+    assert response["page"] == 2
+    mock.assert_awaited_once_with("chrono", "all", 2)
 
 
 async def test_service_unknown_entry_raises(hass, init_integration):
@@ -181,10 +185,10 @@ async def test_launch_token_service(hass, init_integration):
         await hass.services.async_call(
             DOMAIN,
             "launch_token",
-            {"entry_id": entry.entry_id, "data": "bWVudS5yYmY="},
+            {"entry_id": entry.entry_id, "data": "**random:snes"},
             blocking=True,
         )
-    mock.assert_awaited_once_with("bWVudS5yYmY=")
+    mock.assert_awaited_once_with("**random:snes")
 
 
 async def test_set_background_mode_service(hass, init_integration):
@@ -199,3 +203,132 @@ async def test_set_background_mode_service(hass, init_integration):
             blocking=True,
         )
     mock.assert_awaited_once_with(2)
+
+
+async def test_set_background_mode_rejects_invalid_mode(hass, init_integration):
+    import voluptuous as vol
+
+    entry, coordinator = await init_integration()
+    with pytest.raises(vol.Invalid):
+        await hass.services.async_call(
+            DOMAIN,
+            "set_background_mode",
+            {"entry_id": entry.entry_id, "mode": 3},
+            blocking=True,
+        )
+
+
+async def test_delete_screenshot_service(hass, init_integration):
+    entry, coordinator = await init_integration()
+    with patch.object(
+        coordinator.client, "async_delete_screenshot", new=AsyncMock()
+    ) as mock:
+        await hass.services.async_call(
+            DOMAIN,
+            "delete_screenshot",
+            {"entry_id": entry.entry_id, "core": "SNES", "filename": "a.png"},
+            blocking=True,
+        )
+    mock.assert_awaited_once_with("SNES", "a.png")
+
+
+async def test_send_command_requires_ssh(hass, init_integration):
+    entry, coordinator = await init_integration()
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            DOMAIN,
+            "send_command",
+            {"entry_id": entry.entry_id, "command": "volume 5"},
+            blocking=True,
+        )
+
+
+async def test_send_command_service(hass, init_integration, mock_ssh):
+    from homeassistant.exceptions import HomeAssistantError
+    from mister_fpga import MisterMainUnresponsiveError
+
+    from tests.conftest import SSH_OPTIONS
+
+    entry, coordinator = await init_integration(options=SSH_OPTIONS)
+    await hass.services.async_call(
+        DOMAIN,
+        "send_command",
+        {"entry_id": entry.entry_id, "command": "volume 5"},
+        blocking=True,
+    )
+    mock_ssh.async_send_command.assert_awaited_once_with("volume 5")
+
+    mock_ssh.async_send_command.side_effect = MisterMainUnresponsiveError("full")
+    with pytest.raises(HomeAssistantError):
+        await hass.services.async_call(
+            DOMAIN,
+            "send_command",
+            {"entry_id": entry.entry_id, "command": "volume 5"},
+            blocking=True,
+        )
+
+
+async def test_gamepad_press_service(hass, init_integration):
+    entry, coordinator = await init_integration()
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            DOMAIN,
+            "gamepad_press",
+            {"entry_id": entry.entry_id, "button": "start"},
+            blocking=True,
+        )
+    coordinator.gamepad = AsyncMock()
+    await hass.services.async_call(
+        DOMAIN,
+        "gamepad_press",
+        {"entry_id": entry.entry_id, "button": "up", "action": "down"},
+        blocking=True,
+    )
+    coordinator.gamepad.async_press.assert_awaited_once_with("up", "down")
+
+
+async def test_set_ra_debug_service(hass, init_integration, mock_ssh):
+    import types
+
+    from tests.conftest import SSH_OPTIONS
+
+    mock_ssh.ra.async_status.return_value = types.SimpleNamespace(
+        installed=True, cores_on=True, hardcore=False, binary_ra=True,
+        username="u", cores_active=1, cores_total=2,
+    )
+    entry, coordinator = await init_integration(options=SSH_OPTIONS)
+    await hass.services.async_call(
+        DOMAIN,
+        "set_ra_debug",
+        {"entry_id": entry.entry_id, "enabled": True},
+        blocking=True,
+    )
+    mock_ssh.ra.async_set_debug.assert_awaited_once_with(True)
+
+
+@pytest.mark.parametrize(
+    ("service", "data"),
+    [
+        ("launch_game", {"path": "/x"}),
+        ("launch_token", {"data": "**random:snes"}),
+        ("send_command", {"command": "volume 5"}),
+        ("send_keyboard_raw", {"code": 28}),
+        ("create_shortcut", {"game_path": "/g", "folder": "_@F", "name": "n"}),
+    ],
+)
+async def test_dangerous_services_need_admin(
+    hass, init_integration, hass_read_only_user, service, data
+):
+    from homeassistant.core import Context
+    from homeassistant.exceptions import Unauthorized
+
+    entry, coordinator = await init_integration()
+    with pytest.raises(Unauthorized):
+        await hass.services.async_call(
+            DOMAIN,
+            service,
+            {"entry_id": entry.entry_id, **data},
+            blocking=True,
+            context=Context(user_id=hass_read_only_user.id),
+            return_response=service == "create_shortcut",
+        )

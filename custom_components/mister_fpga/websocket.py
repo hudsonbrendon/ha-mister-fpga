@@ -7,7 +7,7 @@ from dataclasses import replace
 
 import aiohttp
 
-from mister_fpga import WS_PATH, MisterStatus, apply_ws_message
+from mister_fpga import WS_PATH, MisterStatus, apply_ws_message, parse_index_status
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -73,4 +73,8 @@ class MisterWebSocket:
         new_status = replace(new_status, online=True)
         self.coordinator.menu_path = menu_path
         self.coordinator.index_exists, self.coordinator.indexing = index_state
+        prefix, _, rest = message.partition(":")
+        if prefix == "indexStatus":
+            self.coordinator.index_status = parse_index_status(rest)
+        self.coordinator.async_check_game_changed(new_status)
         self.coordinator.async_set_updated_data(new_status)

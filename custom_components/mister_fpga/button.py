@@ -7,11 +7,12 @@ from dataclasses import dataclass
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from mister_fpga import MisterClient
+from mister_fpga import MisterClient, MisterGamepadError
 
-from .const import DOMAIN, KEYBOARD_NAMES
+from .const import DOMAIN, GAMEPAD_ENTITY_BUTTONS, KEYBOARD_NAMES
 from .entity import MisterEntity
 
 
@@ -68,6 +69,10 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][entry.entry_id]
     entities: list = [MisterButton(coordinator, entry, d) for d in BUTTONS]
     entities += [MisterNavButton(coordinator, entry, name) for name in KEYBOARD_NAMES]
+    if coordinator.gamepad is not None:
+        entities += [
+            MisterGamepadButton(coordinator, entry, b) for b in GAMEPAD_ENTITY_BUTTONS
+        ]
     async_add_entities(entities)
 
 
@@ -94,3 +99,21 @@ class MisterNavButton(MisterEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         await self.coordinator.client.async_send_keyboard(self._key_name)
+
+
+class MisterGamepadButton(MisterEntity, ButtonEntity):
+    """Taps a virtual controller button via the Companion Remote daemon."""
+
+    _attr_icon = "mdi:gamepad-variant"
+
+    def __init__(self, coordinator, entry, button: str) -> None:
+        super().__init__(coordinator, entry)
+        self._button = button
+        self._attr_translation_key = f"gamepad_{button}"
+        self._attr_unique_id = f"{entry.entry_id}_gamepad_{button}"
+
+    async def async_press(self) -> None:
+        try:
+            await self.coordinator.gamepad.async_press(self._button)
+        except MisterGamepadError as err:
+            raise HomeAssistantError(str(err)) from err

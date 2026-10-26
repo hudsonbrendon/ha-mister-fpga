@@ -60,6 +60,47 @@ def mock_refresh_systems():
     p.stop()
 
 
+@pytest.fixture(autouse=True)
+def mock_optional_features():
+    """PlayLog not running and no gamepad daemon unless a test says otherwise."""
+    with patch(
+        "mister_fpga.client.MisterClient.async_get_playlog_status",
+        new=AsyncMock(return_value={}),
+    ), patch(
+        "mister_fpga.gamepad.MisterGamepad.async_available",
+        new=AsyncMock(return_value=False),
+    ):
+        yield
+
+
+SSH_OPTIONS = {"ssh_enabled": True, "ssh_password": "1"}
+
+
+@pytest.fixture
+def mock_ssh():
+    """Fake MisterSSH/MisterRA so SSH-enabled entries set up offline.
+
+    Set ``mock_ssh.async_probe.return_value`` before init_integration to seed
+    ssh_data; ``mock_ssh.ra`` is the fake MisterRA (not installed by default).
+    """
+    ssh = MagicMock()
+    ssh.async_probe = AsyncMock(return_value={})
+    ssh.async_run = AsyncMock(return_value=(0, ""))
+    ssh.async_close = AsyncMock()
+    ssh.async_send_command = AsyncMock()
+    ssh.async_set_volume = AsyncMock()
+    ssh.async_set_mute = AsyncMock()
+    ra = MagicMock()
+    ra.async_status = AsyncMock(return_value=None)
+    ra.async_read_log = AsyncMock(return_value=(0, []))
+    ra.async_set_debug = AsyncMock()
+    ssh.ra = ra
+    with patch("mister_fpga.MisterSSH", return_value=ssh), patch(
+        "custom_components.mister_fpga.MisterRA", return_value=ra
+    ):
+        yield ssh
+
+
 @pytest.fixture
 def make_status():
     """Factory for a fully-populated MisterStatus, overridable per test."""
@@ -91,13 +132,14 @@ def init_integration(hass, make_status):
     Returns (entry, coordinator).
     """
 
-    async def _init(status=None, systems=None):
+    async def _init(status=None, systems=None, options=None):
         if status is None:
             status = make_status()
         entry = MockConfigEntry(
             domain=DOMAIN,
             title="MiSTer FPGA",
             data={"name": "MiSTer FPGA", "host": "192.168.31.77", "port": 8182},
+            options=options or {},
             entry_id="mister_test",
         )
         entry.add_to_hass(hass)

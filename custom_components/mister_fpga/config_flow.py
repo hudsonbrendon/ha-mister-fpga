@@ -1,7 +1,7 @@
 """Config flow for the MiSTer FPGA integration."""
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import voluptuous as vol
 from homeassistant.config_entries import (
@@ -17,7 +17,12 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from mister_fpga import MisterClient, MisterConnectionError, MisterRAWeb
 from mister_fpga.ra_web import MisterRAWebError
 
+if TYPE_CHECKING:  # module moved in HA 2025.2; only .host/.port/.hostname used
+    from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
+
 from .const import (
+    CONF_GAMEPAD_ENABLED,
+    CONF_PUSH_UPDATES,
     CONF_RA_API_KEY,
     CONF_RA_CLOUD_INTERVAL,
     CONF_RA_USERNAME,
@@ -47,6 +52,9 @@ class MisterConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    def __init__(self) -> None:
+        self._discovered: dict[str, Any] = {}
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -68,6 +76,41 @@ class MisterConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
         return self.async_show_form(
             step_id="user", data_schema=USER_SCHEMA, errors=errors
+        )
+
+    async def async_step_zeroconf(
+        self, discovery_info: ZeroconfServiceInfo
+    ) -> ConfigFlowResult:
+        host = discovery_info.host
+        # unique_id is the host, as in the user step.
+        await self.async_set_unique_id(host)
+        self._abort_if_unique_id_configured()
+        self._async_abort_entries_match({CONF_HOST: host})
+        hostname = (discovery_info.hostname or "").rstrip(".")
+        if hostname:  # also configured by mDNS name, e.g. MiSTer.local
+            self._async_abort_entries_match({CONF_HOST: hostname})
+        name = hostname.split(".")[0] or DEFAULT_NAME
+        self._discovered = {
+            CONF_NAME: name,
+            CONF_HOST: host,
+            CONF_PORT: discovery_info.port or DEFAULT_PORT,
+        }
+        self.context["title_placeholders"] = {"name": name}
+        return await self.async_step_zeroconf_confirm()
+
+    async def async_step_zeroconf_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        if user_input is not None:
+            return self.async_create_entry(
+                title=self._discovered[CONF_NAME], data=self._discovered
+            )
+        return self.async_show_form(
+            step_id="zeroconf_confirm",
+            description_placeholders={
+                "name": self._discovered[CONF_NAME],
+                "host": self._discovered[CONF_HOST],
+            },
         )
 
     @staticmethod
@@ -128,6 +171,13 @@ class MisterOptionsFlow(OptionsFlow):
                 vol.Optional(
                     CONF_SSH_PORT, default=opts.get(CONF_SSH_PORT, DEFAULT_SSH_PORT)
                 ): int,
+                vol.Optional(
+                    CONF_PUSH_UPDATES, default=opts.get(CONF_PUSH_UPDATES, True)
+                ): bool,
+                vol.Optional(
+                    CONF_GAMEPAD_ENABLED,
+                    default=opts.get(CONF_GAMEPAD_ENABLED, True),
+                ): bool,
                 vol.Optional(
                     CONF_RA_USERNAME, default=opts.get(CONF_RA_USERNAME, "")
                 ): str,
