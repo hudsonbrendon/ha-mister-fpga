@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA config flow."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
@@ -68,7 +69,9 @@ async def test_zeroconf_discovery_creates_entry(hass):
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "MiSTer"
     assert result["data"] == {
-        CONF_NAME: "MiSTer", CONF_HOST: "192.168.31.77", CONF_PORT: 8182,
+        CONF_NAME: "MiSTer",
+        CONF_HOST: "192.168.31.77",
+        CONF_PORT: 8182,
     }
     assert result["result"].unique_id == "192.168.31.77"
 

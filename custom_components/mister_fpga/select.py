@@ -1,13 +1,16 @@
 """Select entity for launching MiSTer systems."""
+
 from __future__ import annotations
 
 from homeassistant.components.select import SelectEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import BACKGROUND_MODES, DOMAIN
+from . import MisterConfigEntry
+from .const import BACKGROUND_MODES
 from .entity import MisterEntity
+
+PARALLEL_UPDATES = 1
 
 _BG_BY_NAME = {name: mode for mode, name in BACKGROUND_MODES.items()}
 MUSIC_PLAYBACK_MODES = ["random", "loop", "disabled"]
@@ -15,10 +18,10 @@ MUSIC_PLAYBACK_MODES = ["random", "loop", "disabled"]
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    entry: MisterConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities(
         [
             MisterSystemSelect(coordinator, entry),
@@ -44,9 +47,7 @@ class MisterSystemSelect(MisterEntity, SelectEntity):
 
     @property
     def options(self) -> list[str]:
-        return sorted(
-            s["name"] for s in self.coordinator.systems if s.get("name")
-        )
+        return sorted(s["name"] for s in self.coordinator.systems if s.get("name"))
 
     @property
     def current_option(self) -> str | None:
@@ -147,6 +148,7 @@ class MisterMusicPlaylistSelect(MisterEntity, SelectEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         from mister_fpga import MisterConnectionError
+
         try:
             self._playlists = await self.coordinator.client.async_get_music_playlists()
         except MisterConnectionError:

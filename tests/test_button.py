@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA buttons."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
@@ -74,8 +75,10 @@ async def test_gamepad_buttons_when_daemon_available(hass, init_integration):
     assert coordinator.gamepad is not None
     with patch.object(coordinator.gamepad, "async_press", new=AsyncMock()) as mock:
         await hass.services.async_call(
-            "button", "press",
-            {"entity_id": "button.mister_fpga_gamepad_start"}, blocking=True,
+            "button",
+            "press",
+            {"entity_id": "button.mister_fpga_gamepad_start"},
+            blocking=True,
         )
     mock.assert_awaited_once_with("start")
     for name in ("select", "a", "b", "home"):
@@ -90,8 +93,6 @@ async def test_no_gamepad_buttons_without_daemon(hass, init_integration):
 async def test_gamepad_option_off_skips_probe(hass, init_integration):
     probe = AsyncMock(return_value=True)
     with patch("mister_fpga.gamepad.MisterGamepad.async_available", new=probe):
-        entry, coordinator = await init_integration(
-            options={"gamepad_enabled": False}
-        )
+        entry, coordinator = await init_integration(options={"gamepad_enabled": False})
     probe.assert_not_called()
     assert coordinator.gamepad is None

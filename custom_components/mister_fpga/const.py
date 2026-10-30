@@ -1,4 +1,5 @@
 """Constants for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
 # Re-export protocol constants from the library so platform modules can keep

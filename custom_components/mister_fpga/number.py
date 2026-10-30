@@ -1,21 +1,24 @@
 """Number entities for INI-backed MiSTer video settings."""
+
 from __future__ import annotations
 
 from homeassistant.components.number import NumberEntity, NumberMode
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import DOMAIN, INI_VIDEO_KEYS
+from . import MisterConfigEntry
+from .const import INI_VIDEO_KEYS
 from .entity import MisterEntity
+
+PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    entry: MisterConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities(
         MisterIniNumber(coordinator, entry, key) for key in INI_VIDEO_KEYS
     )
@@ -40,7 +43,7 @@ class MisterIniNumber(MisterEntity, NumberEntity):
         raw = self.coordinator.ini_values.get(self._ini_key)
         try:
             return float(raw) if raw is not None else None
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return None
 
     async def async_set_native_value(self, value: float) -> None:

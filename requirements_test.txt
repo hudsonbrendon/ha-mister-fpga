@@ -1,4 +1,4 @@
-pytest-homeassistant-custom-component==0.13.205
+pytest-homeassistant-custom-component==0.13.375
 aioresponses
 ruff
 python-mister-fpga==0.3.2

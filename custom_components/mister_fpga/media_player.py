@@ -1,4 +1,5 @@
 """Media player for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -10,23 +11,24 @@ from homeassistant.components.media_player import (
     MediaPlayerState,
     MediaType,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from mister_fpga import MisterMainUnresponsiveError
 
-from .const import DOMAIN
+from . import MisterConfigEntry
 from .entity import MisterEntity
+
+PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    entry: MisterConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities([MisterMediaPlayer(coordinator, entry)])
 
 
@@ -40,8 +42,7 @@ class MisterMediaPlayer(MisterEntity, MediaPlayerEntity):
         super().__init__(coordinator, entry)
         self._attr_unique_id = f"{entry.entry_id}_media_player"
         self._attr_supported_features = (
-            MediaPlayerEntityFeature.SELECT_SOURCE
-            | MediaPlayerEntityFeature.PLAY_MEDIA
+            MediaPlayerEntityFeature.SELECT_SOURCE | MediaPlayerEntityFeature.PLAY_MEDIA
         )
         if coordinator.ssh is not None:  # volume goes through Main's FIFO
             self._attr_supported_features |= (
@@ -55,9 +56,7 @@ class MisterMediaPlayer(MisterEntity, MediaPlayerEntity):
         if not data or not data.online:
             return MediaPlayerState.OFF
         return (
-            MediaPlayerState.PLAYING
-            if data.is_running_game
-            else MediaPlayerState.IDLE
+            MediaPlayerState.PLAYING if data.is_running_game else MediaPlayerState.IDLE
         )
 
     @property
@@ -112,9 +111,7 @@ class MisterMediaPlayer(MisterEntity, MediaPlayerEntity):
 
     @property
     def source_list(self) -> list[str]:
-        return sorted(
-            s["name"] for s in self.coordinator.systems if s.get("name")
-        )
+        return sorted(s["name"] for s in self.coordinator.systems if s.get("name"))
 
     async def async_select_source(self, source: str) -> None:
         for system in self.coordinator.systems:

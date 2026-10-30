@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA binary sensor."""
+
 from __future__ import annotations
 
 BINARY_SENSOR_ENTITY_ID = "binary_sensor.mister_fpga_online"
@@ -62,16 +63,15 @@ async def test_main_unresponsive_and_sam_sensors(hass, init_integration, mock_ss
     main = hass.states.get("binary_sensor.mister_fpga_main_unresponsive")
     assert main.state == "off"
     assert main.attributes["device_class"] == "problem"
-    assert hass.states.get(
-        "binary_sensor.mister_fpga_super_attract_mode_active"
-    ).state == "on"
+    assert (
+        hass.states.get("binary_sensor.mister_fpga_super_attract_mode_active").state
+        == "on"
+    )
 
     coordinator.main_unresponsive = True
     coordinator.async_set_updated_data(coordinator.data)
     await hass.async_block_till_done()
-    assert hass.states.get(
-        "binary_sensor.mister_fpga_main_unresponsive"
-    ).state == "on"
+    assert hass.states.get("binary_sensor.mister_fpga_main_unresponsive").state == "on"
 
 
 async def test_ssh_binary_sensors_absent_without_ssh(hass, init_integration):

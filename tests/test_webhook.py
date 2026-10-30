@@ -1,4 +1,5 @@
 """Push updates: the announce_game_url webhook and remote.ini wiring."""
+
 from __future__ import annotations
 
 import subprocess
@@ -32,11 +33,12 @@ async def test_webhook_updates_entities_and_fires_event(hass, init_integration):
     hass.bus.async_listen(EVENT_GAME_CHANGED, lambda e: events.append(e))
 
     request = MockRequest(
-        json.dumps(ANNOUNCE).encode(), mock_source="test", method="POST"
+        json.dumps(ANNOUNCE).encode(),
+        mock_source="test",
+        method="POST",
+        remote="127.0.0.1",  # local_only webhook
     )
-    resp = await webhook.async_handle_webhook(
-        hass, entry.data["webhook_id"], request
-    )
+    resp = await webhook.async_handle_webhook(hass, entry.data["webhook_id"], request)
     assert resp.status == 200
     await hass.async_block_till_done()
 
@@ -62,11 +64,14 @@ async def test_push_updates_writes_remote_ini_and_restarts(
     hass, init_integration, mock_ssh
 ):
     mock_ssh.async_run.return_value = (0, "changed\n")
-    with patch(
-        "custom_components.mister_fpga.get_url", return_value="http://ha.lan:8123"
-    ), patch(
-        "mister_fpga.client.MisterClient.async_restart_remote", new=AsyncMock()
-    ) as restart:
+    with (
+        patch(
+            "custom_components.mister_fpga.get_url", return_value="http://ha.lan:8123"
+        ),
+        patch(
+            "mister_fpga.client.MisterClient.async_restart_remote", new=AsyncMock()
+        ) as restart,
+    ):
         entry, coordinator = await init_integration(options=SSH_OPTIONS)
         await hass.async_block_till_done()
     cmd = mock_ssh.async_run.await_args_list[-1].args[0]
@@ -78,11 +83,14 @@ async def test_push_updates_writes_remote_ini_and_restarts(
 async def test_push_updates_unchanged_does_not_restart(
     hass, init_integration, mock_ssh
 ):
-    with patch(
-        "custom_components.mister_fpga.get_url", return_value="http://ha.lan:8123"
-    ), patch(
-        "mister_fpga.client.MisterClient.async_restart_remote", new=AsyncMock()
-    ) as restart:
+    with (
+        patch(
+            "custom_components.mister_fpga.get_url", return_value="http://ha.lan:8123"
+        ),
+        patch(
+            "mister_fpga.client.MisterClient.async_restart_remote", new=AsyncMock()
+        ) as restart,
+    ):
         await init_integration(options=SSH_OPTIONS)
         await hass.async_block_till_done()
     restart.assert_not_called()
@@ -102,7 +110,9 @@ async def test_push_updates_off_leaves_remote_ini_alone(
 def _run_script(path, url):
     out = subprocess.run(
         [sys.executable, "-c", _SET_ANNOUNCE_PY, str(path), url],
-        capture_output=True, text=True, check=True,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     return out.stdout
 

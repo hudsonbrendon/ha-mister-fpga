@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA system select."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
@@ -43,7 +44,8 @@ async def test_run_script_select(hass, init_integration):
         coordinator.client, "async_launch_script", new=AsyncMock()
     ) as mock:
         await hass.services.async_call(
-            "select", "select_option",
+            "select",
+            "select_option",
             {"entity_id": "select.mister_fpga_run_script", "option": "update_all"},
             blocking=True,
         )
@@ -56,7 +58,8 @@ async def test_background_mode_select(hass, init_integration):
         coordinator.client, "async_set_background_mode", new=AsyncMock()
     ) as mock:
         await hass.services.async_call(
-            "select", "select_option",
+            "select",
+            "select_option",
             {"entity_id": "select.mister_fpga_background_mode", "option": "wallpaper"},
             blocking=True,
         )
@@ -76,7 +79,8 @@ async def test_active_ini_select(hass, init_integration):
         coordinator.client, "async_set_active_ini", new=AsyncMock()
     ) as mock:
         await hass.services.async_call(
-            "select", "select_option",
+            "select",
+            "select_option",
             {"entity_id": "select.mister_fpga_active_ini", "option": "exam"},
             blocking=True,
         )
@@ -90,7 +94,13 @@ async def test_background_mode_options_and_current(hass, init_integration):
     await hass.async_block_till_done()
     state = hass.states.get("select.mister_fpga_background_mode")
     assert state.attributes["options"] == [
-        "none", "wallpaper", "hbars1", "hbars2", "vbars1", "vbars2",
-        "spectrum", "black",
+        "none",
+        "wallpaper",
+        "hbars1",
+        "hbars2",
+        "vbars1",
+        "vbars2",
+        "spectrum",
+        "black",
     ]
     assert state.state == "spectrum"

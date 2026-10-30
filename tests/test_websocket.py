@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA WebSocket HA adapter."""
+
 from __future__ import annotations
 
 from mister_fpga import MisterStatus

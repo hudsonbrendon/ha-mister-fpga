@@ -1,26 +1,28 @@
 """Background music (BGM) switch for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from mister_fpga import MisterConnectionError, MisterRAError
 
-from .const import DOMAIN
+from . import MisterConfigEntry
 from .entity import MisterEntity
+
+PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    entry: MisterConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     entities = [MisterMusicSwitch(coordinator, entry)]
     ra_data = getattr(coordinator, "ra_data", None)
     if ra_data is not None and ra_data.installed:

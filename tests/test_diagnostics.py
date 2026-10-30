@@ -1,4 +1,5 @@
 """Tests for MiSTer FPGA diagnostics."""
+
 from __future__ import annotations
 
 from custom_components.mister_fpga.diagnostics import (
@@ -16,7 +17,7 @@ async def test_diagnostics(hass, init_integration):
     assert diag["ssh_enabled"] is False
 
 
-async def test_diagnostics_redacts_ssh_password(hass):
+async def test_diagnostics_redacts_ssh_password(hass, mock_ssh):
     from unittest.mock import AsyncMock, patch
 
     from mister_fpga import MisterStatus

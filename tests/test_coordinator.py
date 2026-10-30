@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA coordinator."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock
@@ -85,21 +86,28 @@ async def test_refresh_systems_swallows_errors(hass):
 
 async def test_coordinator_collects_extras(hass):
     from unittest.mock import AsyncMock
+
     client = AsyncMock()
     client.async_get_status.return_value = MisterStatus(online=True, core="SNES")
     client.async_get_music_status.return_value = {
-        "running": True, "playing": True, "track": "x.mp3",
-        "playlist": "Vidya", "playback": "random",
+        "running": True,
+        "playing": True,
+        "track": "x.mp3",
+        "playlist": "Vidya",
+        "playback": "random",
     }
     client.async_get_wallpapers.return_value = {
-        "active": "a.png", "backgroundMode": 2,
+        "active": "a.png",
+        "backgroundMode": 2,
         "wallpapers": [{"filename": "a.png"}],
     }
     client.async_get_inis.return_value = {
-        "active": 0, "inis": [{"id": 1, "displayName": "Main"}],
+        "active": 0,
+        "inis": [{"id": 1, "displayName": "Main"}],
     }
     client.async_get_ini_values.return_value = {
-        "__ethernetMacAddress": "AA:BB", "video_brightness": "50",
+        "__ethernetMacAddress": "AA:BB",
+        "video_brightness": "50",
     }
     client.async_get_peers.return_value = [{"ip": "1.2.3.4"}]
     client.async_get_screenshots.return_value = [
@@ -118,6 +126,7 @@ async def test_coordinator_collects_extras(hass):
 
 async def test_coordinator_extras_tolerate_errors(hass):
     from unittest.mock import AsyncMock
+
     client = AsyncMock()
     client.async_get_status.return_value = MisterStatus(online=True)
     client.async_get_music_status.side_effect = MisterConnectionError("x")
@@ -136,6 +145,7 @@ async def test_coordinator_extras_tolerate_errors(hass):
 async def test_slow_extras_are_throttled(hass):
     """Music polls every cycle; wallpapers/INIs/peers/screenshots do not."""
     from unittest.mock import AsyncMock
+
     client = AsyncMock()
     client.async_get_music_status.return_value = {"track": "x.mp3"}
     client.async_get_wallpapers.return_value = {"active": "a.png"}
@@ -158,9 +168,11 @@ async def test_slow_extras_are_throttled(hass):
 
 async def test_coordinator_refresh_scripts(hass):
     from unittest.mock import AsyncMock
+
     client = AsyncMock()
     client.async_get_scripts.return_value = {
-        "canLaunch": True, "scripts": [{"name": "a", "filename": "a.sh"}],
+        "canLaunch": True,
+        "scripts": [{"name": "a", "filename": "a.sh"}],
     }
     coordinator = MisterDataUpdateCoordinator(hass, client, 15)
     await coordinator.async_refresh_scripts()
@@ -197,9 +209,7 @@ def _playlog_client(**status):
 
 
 async def test_playlog_fetched_when_running(hass):
-    coordinator = MisterDataUpdateCoordinator(
-        hass, _playlog_client(running=True), 15
-    )
+    coordinator = MisterDataUpdateCoordinator(hass, _playlog_client(running=True), 15)
     await coordinator.async_refresh_extras()
     assert coordinator.playlog["totalTime"] == 7200
     assert coordinator.playlog_today == 1800
@@ -267,7 +277,8 @@ async def test_ra_log_events_skip_backlog_then_fire(hass):
     await hass.async_block_till_done()
 
     assert [c.args[0] for c in coordinator.ra.async_read_log.call_args_list] == [
-        0, 500,
+        0,
+        500,
     ]
     assert [e.data for e in events] == [new]
 
@@ -326,8 +337,14 @@ async def test_core_only_announce_has_no_game(hass):
     coordinator.data = MisterStatus(online=True, core="GBC", game="GBC/a.gbc")
     # mrext sends gameFilename "." (filepath.Base("")) when no game is loaded
     coordinator.async_handle_announce(
-        {"core": "GBC", "system": "GameboyColor", "systemName": "Gameboy Color",
-         "gamePath": "", "gameFilename": ".", "gameName": ""}
+        {
+            "core": "GBC",
+            "system": "GameboyColor",
+            "systemName": "Gameboy Color",
+            "gamePath": "",
+            "gameFilename": ".",
+            "gameName": "",
+        }
     )
     assert coordinator.data.game is None
     assert coordinator.data.system == "GameboyColor"

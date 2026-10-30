@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA sensors."""
+
 from __future__ import annotations
 
 
@@ -18,7 +19,7 @@ async def test_sensor_unknown_when_no_game(hass, init_integration, make_status):
 
 
 async def test_disk_and_meta_sensors(hass, init_integration, make_status):
-    GIB = 1024 ** 3
+    GIB = 1024**3
     status = make_status(
         disk_total=100 * GIB, disk_used=75 * GIB, disk_free=25 * GIB, dns="MiSTer.local"
     )
@@ -109,12 +110,15 @@ async def test_playlog_sensors(hass, init_integration):
             "topSystems": [{"name": "SNES", "time": 6000}],
         }
 
-    with patch(
-        "mister_fpga.client.MisterClient.async_get_playlog_status",
-        new=AsyncMock(return_value={"running": True}),
-    ), patch(
-        "mister_fpga.client.MisterClient.async_get_playlog_summary",
-        new=AsyncMock(side_effect=_summary),
+    with (
+        patch(
+            "mister_fpga.client.MisterClient.async_get_playlog_status",
+            new=AsyncMock(return_value={"running": True}),
+        ),
+        patch(
+            "mister_fpga.client.MisterClient.async_get_playlog_summary",
+            new=AsyncMock(side_effect=_summary),
+        ),
     ):
         await init_integration()
 

@@ -1,4 +1,5 @@
 """RA construction in setup."""
+
 import types
 
 import pytest

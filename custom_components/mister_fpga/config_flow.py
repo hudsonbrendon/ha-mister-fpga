@@ -1,24 +1,23 @@
 """Config flow for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
-    OptionsFlow,
+    OptionsFlowWithReload,
 )
 from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
+import voluptuous as vol
 
 from mister_fpga import MisterClient, MisterConnectionError, MisterRAWeb
 from mister_fpga.ra_web import MisterRAWebError
-
-if TYPE_CHECKING:  # module moved in HA 2025.2; only .host/.port/.hostname used
-    from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
 from .const import (
     CONF_GAMEPAD_ENABLED,
@@ -27,10 +26,16 @@ from .const import (
     CONF_RA_CLOUD_INTERVAL,
     CONF_RA_USERNAME,
     CONF_SCAN_INTERVAL,
+    CONF_SSH_ENABLED,
+    CONF_SSH_PASSWORD,
+    CONF_SSH_PORT,
+    CONF_SSH_USERNAME,
     DEFAULT_NAME,
     DEFAULT_PORT,
     DEFAULT_RA_CLOUD_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_SSH_PORT,
+    DEFAULT_SSH_USERNAME,
     DOMAIN,
     MAX_RA_CLOUD_INTERVAL,
     MAX_SCAN_INTERVAL,
@@ -116,27 +121,15 @@ class MisterConfigFlow(ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> MisterOptionsFlow:
-        return MisterOptionsFlow(config_entry)
+        return MisterOptionsFlow()
 
 
-class MisterOptionsFlow(OptionsFlow):
-    """Handle MiSTer FPGA options (scan interval)."""
-
-    def __init__(self, config_entry: ConfigEntry) -> None:
-        self._entry = config_entry
+class MisterOptionsFlow(OptionsFlowWithReload):
+    """Handle MiSTer FPGA options; the entry reloads when they change."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        from .const import (
-            CONF_SSH_ENABLED,
-            CONF_SSH_PASSWORD,
-            CONF_SSH_PORT,
-            CONF_SSH_USERNAME,
-            DEFAULT_SSH_PORT,
-            DEFAULT_SSH_USERNAME,
-        )
-
         errors: dict[str, str] = {}
         if user_input is not None:
             ra_user = user_input.get(CONF_RA_USERNAME)
@@ -151,7 +144,7 @@ class MisterOptionsFlow(OptionsFlow):
             if not errors:
                 return self.async_create_entry(title="", data=user_input)
 
-        opts = self._entry.options
+        opts = self.config_entry.options
         current = opts.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
         schema = vol.Schema(
             {
@@ -186,15 +179,11 @@ class MisterOptionsFlow(OptionsFlow):
                 ): str,
                 vol.Optional(
                     CONF_RA_CLOUD_INTERVAL,
-                    default=opts.get(
-                        CONF_RA_CLOUD_INTERVAL, DEFAULT_RA_CLOUD_INTERVAL
-                    ),
+                    default=opts.get(CONF_RA_CLOUD_INTERVAL, DEFAULT_RA_CLOUD_INTERVAL),
                 ): vol.All(
                     int,
                     vol.Range(min=MIN_RA_CLOUD_INTERVAL, max=MAX_RA_CLOUD_INTERVAL),
                 ),
             }
         )
-        return self.async_show_form(
-            step_id="init", data_schema=schema, errors=errors
-        )
+        return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

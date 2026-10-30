@@ -1,14 +1,25 @@
 {
   "domain": "mister_fpga",
   "name": "MiSTer FPGA",
-  "codeowners": ["@hudsonbrendon"],
+  "codeowners": [
+    "@hudsonbrendon"
+  ],
   "config_flow": true,
-  "dependencies": ["webhook"],
+  "dependencies": [
+    "webhook"
+  ],
   "documentation": "https://github.com/hudsonbrendon/ha-mister-fpga",
   "integration_type": "device",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/hudsonbrendon/ha-mister-fpga/issues",
-  "requirements": ["python-mister-fpga==0.3.2"],
-  "version": "0.6.0",
-  "zeroconf": ["_mister-remote._tcp.local."]
+  "loggers": [
+    "mister_fpga"
+  ],
+  "requirements": [
+    "python-mister-fpga==0.3.2"
+  ],
+  "version": "0.6.1",
+  "zeroconf": [
+    "_mister-remote._tcp.local."
+  ]
 }
