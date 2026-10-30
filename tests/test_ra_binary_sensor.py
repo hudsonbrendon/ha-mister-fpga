@@ -1,4 +1,5 @@
 """RA supported-game binary sensor tests."""
+
 import types
 
 from custom_components.mister_fpga.binary_sensor import MisterRAGameSupportedSensor
@@ -7,7 +8,9 @@ from custom_components.mister_fpga.binary_sensor import MisterRAGameSupportedSen
 def _coord(core=None, running=True, installed=True):
     return types.SimpleNamespace(
         data=types.SimpleNamespace(
-            online=True, version="x", core=core,
+            online=True,
+            version="x",
+            core=core,
             is_running_game=running,
         ),
         ra_data=(

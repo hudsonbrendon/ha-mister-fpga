@@ -1,28 +1,31 @@
 """Latest-screenshot image entity for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
 from homeassistant.components.image import ImageEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from mister_fpga import MisterConnectionError
 from mister_fpga.ra_web import MisterRAWebError
 
-from .const import DOMAIN
+from . import MisterConfigEntry
 from .coordinator import MisterDataUpdateCoordinator
 from .entity import MisterEntity
 from .ra_web_coordinator import MisterRAWebCoordinator
 from .ra_web_entity import MisterRAWebEntity
 
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    entry: MisterConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities([MisterScreenshotImage(hass, coordinator, entry)])
     ra_web_coordinator = getattr(coordinator, "ra_web_coordinator", None)
     if ra_web_coordinator is not None:

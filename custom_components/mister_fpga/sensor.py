@@ -1,4 +1,5 @@
 """Sensors for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -10,24 +11,23 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, UnitOfInformation, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from mister_fpga import MisterStatus
 
-from .const import DOMAIN
+from . import MisterConfigEntry
 from .coordinator import MisterDataUpdateCoordinator
 from .entity import MisterEntity
+
+PARALLEL_UPDATES = 0
 
 
 @dataclass(frozen=True, kw_only=True)
 class MisterSensorEntityDescription(SensorEntityDescription):
-    value_fn: (
-        Callable[[MisterStatus], str | int | float | None] | None
-    ) = None
+    value_fn: Callable[[MisterStatus], str | int | float | None] | None = None
     coordinator_fn: (
         Callable[[MisterDataUpdateCoordinator], str | int | float | None] | None
     ) = None
@@ -38,6 +38,7 @@ def _ts_to_datetime(ts):
     if not ts:
         return None
     import datetime as _dt
+
     return _dt.datetime.fromtimestamp(ts, tz=_dt.UTC)
 
 
@@ -48,7 +49,7 @@ def _disk_usage(status: MisterStatus) -> float | None:
 
 
 def _disk_free_gib(status: MisterStatus) -> float | None:
-    return round(status.disk_free / (1024 ** 3), 1) if status.disk_free else None
+    return round(status.disk_free / (1024**3), 1) if status.disk_free else None
 
 
 SENSORS: tuple[MisterSensorEntityDescription, ...] = (
@@ -260,12 +261,18 @@ def _duration(key, translation_key, icon, value_fn, suggested_unit):
 
 PLAYLOG_SENSORS: tuple[MisterSensorEntityDescription, ...] = (
     _duration(
-        "playtime_today", "playtime_today", "mdi:timer-play",
-        lambda c: c.playlog_today, UnitOfTime.MINUTES,
+        "playtime_today",
+        "playtime_today",
+        "mdi:timer-play",
+        lambda c: c.playlog_today,
+        UnitOfTime.MINUTES,
     ),
     _duration(
-        "playtime_total", "playtime_total", "mdi:timer-sand-complete",
-        lambda c: _playlog(c, "totalTime"), UnitOfTime.HOURS,
+        "playtime_total",
+        "playtime_total",
+        "mdi:timer-sand-complete",
+        lambda c: _playlog(c, "totalTime"),
+        UnitOfTime.HOURS,
     ),
     MisterSensorEntityDescription(
         key="games_played",
@@ -328,8 +335,7 @@ RA_SENSORS: tuple[MisterSensorEntityDescription, ...] = (
         icon="mdi:chip",
         entity_category=EntityCategory.DIAGNOSTIC,
         coordinator_fn=lambda c: (
-            None if _ra(c) is None
-            else ("RA (odelot)" if _ra(c).binary_ra else "Stock")
+            None if _ra(c) is None else ("RA (odelot)" if _ra(c).binary_ra else "Stock")
         ),
     ),
     MisterSensorEntityDescription(
@@ -345,8 +351,7 @@ RA_SENSORS: tuple[MisterSensorEntityDescription, ...] = (
         icon="mdi:trophy-variant",
         entity_category=EntityCategory.DIAGNOSTIC,
         coordinator_fn=lambda c: (
-            None if _ra(c) is None
-            else f"{_ra(c).cores_active}/{_ra(c).cores_total}"
+            None if _ra(c) is None else f"{_ra(c).cores_active}/{_ra(c).cores_total}"
         ),
     ),
 )
@@ -354,10 +359,10 @@ RA_SENSORS: tuple[MisterSensorEntityDescription, ...] = (
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    entry: MisterConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     descriptions = list(SENSORS)
     if coordinator.ssh is not None:
         descriptions.extend(SSH_SENSORS)

@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA background music switch."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch

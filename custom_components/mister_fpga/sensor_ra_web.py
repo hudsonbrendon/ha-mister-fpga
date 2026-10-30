@@ -1,4 +1,5 @@
 """RetroAchievements cloud-stats sensors (bound to the web coordinator)."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -84,9 +85,9 @@ RA_WEB_SENSORS: tuple[RAWebSensorDescription, ...] = (
         translation_key="ra_rank",
         icon="mdi:podium",
         value_fn=lambda s: s.rank,
-        attr_fn=lambda s: {"total_ranked": s.total_ranked}
-        if s.total_ranked is not None
-        else {},
+        attr_fn=lambda s: (
+            {"total_ranked": s.total_ranked} if s.total_ranked is not None else {}
+        ),
     ),
     RAWebSensorDescription(
         key="ra_current_game",

@@ -1,4 +1,5 @@
 """Base entity for RetroAchievements cloud-stats entities."""
+
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
@@ -14,11 +15,7 @@ class MisterRAWebEntity(CoordinatorEntity[MisterRAWebCoordinator]):
 
     _attr_has_entity_name = True
 
-    def __init__(
-        self, coordinator: MisterRAWebCoordinator, entry: ConfigEntry
-    ) -> None:
+    def __init__(self, coordinator: MisterRAWebCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
         self._entry = entry
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)}
-        )
+        self._attr_device_info = DeviceInfo(identifiers={(DOMAIN, entry.entry_id)})

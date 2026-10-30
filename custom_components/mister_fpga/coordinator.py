@@ -1,9 +1,10 @@
 """DataUpdateCoordinator for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
-import logging
 from dataclasses import replace
 from datetime import timedelta
+import logging
 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -37,10 +38,10 @@ _RA_LOG_CHUNK = 200_000
 _RA_LOG_MAX_READS = 64
 
 
-
 def _is_mac_junk(name: str | None) -> bool:
-    """macOS AppleDouble files (``._foo``) copied onto the SD card."""
+    """MacOS AppleDouble files (``._foo``) copied onto the SD card."""
     return bool(name) and name.startswith("._")
+
 
 class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
     """Polls the MiSTer Remote API and exposes a MisterStatus to entities."""
@@ -200,7 +201,7 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
                         self.hass.bus.async_fire(EVENT_RETROACHIEVEMENTS, event)
                 if advanced < _RA_LOG_CHUNK:
                     break
-        except Exception as err:  # noqa: BLE001 - SSH is best-effort
+        except Exception as err:
             _LOGGER.debug("RA log read failed: %s", err)
             return
         self._ra_log_offset = offset
@@ -240,7 +241,8 @@ class MisterDataUpdateCoordinator(DataUpdateCoordinator[MisterStatus]):
         self.wallpapers = wallpapers if isinstance(wallpapers, dict) else {}
         if isinstance(self.wallpapers.get("wallpapers"), list):
             self.wallpapers["wallpapers"] = [
-                w for w in self.wallpapers["wallpapers"]
+                w
+                for w in self.wallpapers["wallpapers"]
                 if not _is_mac_junk(w.get("filename"))
             ]
         inis = await self._safe(self.client.async_get_inis(), {})

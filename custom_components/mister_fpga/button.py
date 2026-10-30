@@ -1,19 +1,22 @@
 """Buttons for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from mister_fpga import MisterClient, MisterGamepadError
 
-from .const import DOMAIN, GAMEPAD_ENTITY_BUTTONS, KEYBOARD_NAMES
+from . import MisterConfigEntry
+from .const import GAMEPAD_ENTITY_BUTTONS, KEYBOARD_NAMES
 from .entity import MisterEntity
+
+PARALLEL_UPDATES = 1
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -23,50 +26,68 @@ class MisterButtonEntityDescription(ButtonEntityDescription):
 
 BUTTONS: tuple[MisterButtonEntityDescription, ...] = (
     MisterButtonEntityDescription(
-        key="reboot", translation_key="reboot", icon="mdi:restart",
+        key="reboot",
+        translation_key="reboot",
+        icon="mdi:restart",
         press_fn=lambda c: c.async_reboot(),
     ),
     MisterButtonEntityDescription(
-        key="go_to_menu", translation_key="go_to_menu", icon="mdi:home",
+        key="go_to_menu",
+        translation_key="go_to_menu",
+        icon="mdi:home",
         press_fn=lambda c: c.async_launch_menu(),
     ),
     MisterButtonEntityDescription(
-        key="take_screenshot", translation_key="take_screenshot", icon="mdi:camera",
+        key="take_screenshot",
+        translation_key="take_screenshot",
+        icon="mdi:camera",
         press_fn=lambda c: c.async_take_screenshot(),
     ),
     MisterButtonEntityDescription(
-        key="restart_remote", translation_key="restart_remote",
-        icon="mdi:restart-alert", press_fn=lambda c: c.async_restart_remote(),
+        key="restart_remote",
+        translation_key="restart_remote",
+        icon="mdi:restart-alert",
+        press_fn=lambda c: c.async_restart_remote(),
     ),
     MisterButtonEntityDescription(
-        key="index_games", translation_key="index_games",
-        icon="mdi:database-refresh", press_fn=lambda c: c.async_index_games(),
+        key="index_games",
+        translation_key="index_games",
+        icon="mdi:database-refresh",
+        press_fn=lambda c: c.async_index_games(),
     ),
     MisterButtonEntityDescription(
-        key="music_next", translation_key="music_next",
-        icon="mdi:skip-next", press_fn=lambda c: c.async_music_next(),
+        key="music_next",
+        translation_key="music_next",
+        icon="mdi:skip-next",
+        press_fn=lambda c: c.async_music_next(),
     ),
     MisterButtonEntityDescription(
-        key="clear_wallpaper", translation_key="clear_wallpaper",
-        icon="mdi:wallpaper", press_fn=lambda c: c.async_clear_wallpaper(),
+        key="clear_wallpaper",
+        translation_key="clear_wallpaper",
+        icon="mdi:wallpaper",
+        press_fn=lambda c: c.async_clear_wallpaper(),
     ),
     MisterButtonEntityDescription(
-        key="framebuffer_console", translation_key="framebuffer_console",
-        icon="mdi:console", press_fn=lambda c: c.async_open_console(),
+        key="framebuffer_console",
+        translation_key="framebuffer_console",
+        icon="mdi:console",
+        press_fn=lambda c: c.async_open_console(),
     ),
     MisterButtonEntityDescription(
-        key="kill_script", translation_key="kill_script",
-        icon="mdi:stop-circle", press_fn=lambda c: c.async_kill_script(),
+        key="kill_script",
+        translation_key="kill_script",
+        icon="mdi:stop-circle",
+        press_fn=lambda c: c.async_kill_script(),
     ),
 )
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    entry: MisterConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     entities: list = [MisterButton(coordinator, entry, d) for d in BUTTONS]
     entities += [MisterNavButton(coordinator, entry, name) for name in KEYBOARD_NAMES]
     if coordinator.gamepad is not None:

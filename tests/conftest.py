@@ -1,10 +1,11 @@
 """Shared fixtures for the MiSTer FPGA tests."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 from mister_fpga import MisterStatus
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.mister_fpga.const import DOMAIN
@@ -29,7 +30,7 @@ def mock_clientsession():
             p = patch(target, return_value=session)
             p.start()
             patchers.append(p)
-        except (AttributeError, ModuleNotFoundError):
+        except AttributeError, ModuleNotFoundError:
             # Module/attribute not present yet (created in a later task).
             continue
     yield session
@@ -63,12 +64,15 @@ def mock_refresh_systems():
 @pytest.fixture(autouse=True)
 def mock_optional_features():
     """PlayLog not running and no gamepad daemon unless a test says otherwise."""
-    with patch(
-        "mister_fpga.client.MisterClient.async_get_playlog_status",
-        new=AsyncMock(return_value={}),
-    ), patch(
-        "mister_fpga.gamepad.MisterGamepad.async_available",
-        new=AsyncMock(return_value=False),
+    with (
+        patch(
+            "mister_fpga.client.MisterClient.async_get_playlog_status",
+            new=AsyncMock(return_value={}),
+        ),
+        patch(
+            "mister_fpga.gamepad.MisterGamepad.async_available",
+            new=AsyncMock(return_value=False),
+        ),
     ):
         yield
 
@@ -95,8 +99,9 @@ def mock_ssh():
     ra.async_read_log = AsyncMock(return_value=(0, []))
     ra.async_set_debug = AsyncMock()
     ssh.ra = ra
-    with patch("mister_fpga.MisterSSH", return_value=ssh), patch(
-        "custom_components.mister_fpga.MisterRA", return_value=ra
+    with (
+        patch("custom_components.mister_fpga.MisterSSH", return_value=ssh),
+        patch("custom_components.mister_fpga.MisterRA", return_value=ra),
     ):
         yield ssh
 
@@ -143,37 +148,47 @@ def init_integration(hass, make_status):
             entry_id="mister_test",
         )
         entry.add_to_hass(hass)
-        with patch(
-            "mister_fpga.client.MisterClient.async_get_status",
-            new=AsyncMock(return_value=status),
-        ), patch(
-            "mister_fpga.client.MisterClient.async_get_music_status",
-            new=AsyncMock(return_value={"playing": False}),
-        ), patch(
-            "mister_fpga.client.MisterClient.async_get_wallpapers",
-            new=AsyncMock(return_value={}),
-        ), patch(
-            "mister_fpga.client.MisterClient.async_get_inis",
-            new=AsyncMock(return_value={"active": 0, "inis": []}),
-        ), patch(
-            "mister_fpga.client.MisterClient.async_get_ini_values",
-            new=AsyncMock(return_value={}),
-        ), patch(
-            "mister_fpga.client.MisterClient.async_get_peers",
-            new=AsyncMock(return_value=[]),
-        ), patch(
-            "mister_fpga.client.MisterClient.async_get_screenshots",
-            new=AsyncMock(return_value=[]),
-        ), patch(
-            "mister_fpga.client.MisterClient.async_get_scripts",
-            new=AsyncMock(return_value={"scripts": []}),
-        ), patch(
-            "mister_fpga.client.MisterClient.async_get_music_playlists",
-            new=AsyncMock(return_value=[]),
+        with (
+            patch(
+                "mister_fpga.client.MisterClient.async_get_status",
+                new=AsyncMock(return_value=status),
+            ),
+            patch(
+                "mister_fpga.client.MisterClient.async_get_music_status",
+                new=AsyncMock(return_value={"playing": False}),
+            ),
+            patch(
+                "mister_fpga.client.MisterClient.async_get_wallpapers",
+                new=AsyncMock(return_value={}),
+            ),
+            patch(
+                "mister_fpga.client.MisterClient.async_get_inis",
+                new=AsyncMock(return_value={"active": 0, "inis": []}),
+            ),
+            patch(
+                "mister_fpga.client.MisterClient.async_get_ini_values",
+                new=AsyncMock(return_value={}),
+            ),
+            patch(
+                "mister_fpga.client.MisterClient.async_get_peers",
+                new=AsyncMock(return_value=[]),
+            ),
+            patch(
+                "mister_fpga.client.MisterClient.async_get_screenshots",
+                new=AsyncMock(return_value=[]),
+            ),
+            patch(
+                "mister_fpga.client.MisterClient.async_get_scripts",
+                new=AsyncMock(return_value={"scripts": []}),
+            ),
+            patch(
+                "mister_fpga.client.MisterClient.async_get_music_playlists",
+                new=AsyncMock(return_value=[]),
+            ),
         ):
             await hass.config_entries.async_setup(entry.entry_id)
             await hass.async_block_till_done()
-        coordinator = hass.data[DOMAIN][entry.entry_id]
+        coordinator = entry.runtime_data
         if systems is not None:
             coordinator.systems = systems
             coordinator.async_set_updated_data(coordinator.data)

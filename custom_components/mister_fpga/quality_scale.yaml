@@ -1,0 +1,84 @@
+rules:
+  # Bronze
+  action-setup: done
+  appropriate-polling: done
+  brands: done
+  common-modules: done
+  config-flow: done
+  config-flow-test-coverage: done
+  dependency-transparency: done
+  docs-actions: done
+  docs-conditions:
+    status: exempt
+    comment: The integration does not provide conditions.
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: todo
+  docs-triggers:
+    status: exempt
+    comment: The integration does not provide triggers; events are documented in the README.
+  entity-event-setup: done
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup:
+    status: todo
+    comment: An unreachable MiSTer sets up as offline on purpose; setup never raises ConfigEntryNotReady.
+  unique-config-entry: done
+
+  # Silver
+  action-exceptions: done
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable:
+    status: todo
+    comment: Only the SSH/RA entities override available(); the rest stay available while the device is offline.
+  integration-owner: done
+  log-when-unavailable:
+    status: todo
+    comment: Unreachable device is logged at debug level only.
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: The Remote API has no authentication; SSH credentials live in options.
+  test-coverage: done
+
+  # Gold
+  devices: done
+  diagnostics: done
+  discovery: done
+  discovery-update-info:
+    status: todo
+    comment: Zeroconf discovery aborts for a known host instead of updating its IP.
+  docs-data-update: done
+  docs-examples: done
+  docs-known-limitations: done
+  docs-supported-devices: done
+  docs-supported-functions: done
+  docs-troubleshooting: todo
+  docs-use-cases: done
+  dynamic-devices:
+    status: exempt
+    comment: One config entry is one MiSTer; everything is an entity of that device.
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default: todo
+  entity-translations: done
+  exception-translations: todo
+  icon-translations:
+    status: todo
+    comment: Icons are set in code (icon= / _attr_icon); no icons.json yet.
+  reconfiguration-flow: todo
+  repair-issues:
+    status: exempt
+    comment: Failures surface through entity state and the connectivity sensor; nothing needs a repair flow.
+  stale-devices:
+    status: exempt
+    comment: One config entry is one MiSTer; removing the entry removes the device.
+
+  # Platinum
+  async-dependency: done
+  inject-websession: done
+  strict-typing: todo

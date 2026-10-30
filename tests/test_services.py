@@ -1,10 +1,11 @@
 """Tests for the MiSTer FPGA services."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
 
-import pytest
 from homeassistant.exceptions import ServiceValidationError
+import pytest
 
 from custom_components.mister_fpga.const import DOMAIN
 
@@ -54,7 +55,10 @@ async def test_send_keyboard_service(hass, init_integration):
 async def test_search_games_service_returns_response(hass, init_integration):
     entry, coordinator = await init_integration()
     payload = {
-        "data": [{"name": "Chrono Trigger"}], "total": 1, "pageSize": 50, "page": 2,
+        "data": [{"name": "Chrono Trigger"}],
+        "total": 1,
+        "pageSize": 50,
+        "page": 2,
     }
     with patch.object(
         coordinator.client,
@@ -100,9 +104,7 @@ async def test_run_script_service(hass, init_integration):
 
 async def test_launch_path_service(hass, init_integration):
     entry, coordinator = await init_integration()
-    with patch.object(
-        coordinator.client, "async_launch_path", new=AsyncMock()
-    ) as mock:
+    with patch.object(coordinator.client, "async_launch_path", new=AsyncMock()) as mock:
         await hass.services.async_call(
             DOMAIN,
             "launch",
@@ -293,8 +295,13 @@ async def test_set_ra_debug_service(hass, init_integration, mock_ssh):
     from tests.conftest import SSH_OPTIONS
 
     mock_ssh.ra.async_status.return_value = types.SimpleNamespace(
-        installed=True, cores_on=True, hardcore=False, binary_ra=True,
-        username="u", cores_active=1, cores_total=2,
+        installed=True,
+        cores_on=True,
+        hardcore=False,
+        binary_ra=True,
+        username="u",
+        cores_active=1,
+        cores_total=2,
     )
     entry, coordinator = await init_integration(options=SSH_OPTIONS)
     await hass.services.async_call(

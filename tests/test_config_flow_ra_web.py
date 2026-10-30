@@ -21,9 +21,7 @@ async def _options_flow(hass, user_input):
 
 
 async def test_options_invalid_ra_creds_show_error(hass):
-    with patch(
-        "custom_components.mister_fpga.config_flow.MisterRAWeb"
-    ) as mock_web:
+    with patch("custom_components.mister_fpga.config_flow.MisterRAWeb") as mock_web:
         mock_web.return_value.async_validate = AsyncMock(
             side_effect=MisterRAWebError("bad")
         )
@@ -36,9 +34,7 @@ async def test_options_invalid_ra_creds_show_error(hass):
 
 
 async def test_options_valid_ra_creds_create_entry(hass):
-    with patch(
-        "custom_components.mister_fpga.config_flow.MisterRAWeb"
-    ) as mock_web:
+    with patch("custom_components.mister_fpga.config_flow.MisterRAWeb") as mock_web:
         mock_web.return_value.async_validate = AsyncMock(return_value=None)
         mock_web.return_value.async_close = AsyncMock()
         result = await _options_flow(

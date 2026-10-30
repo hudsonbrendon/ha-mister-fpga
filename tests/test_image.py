@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA screenshot image entity."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
@@ -20,13 +21,18 @@ async def test_async_image_fetches_latest(hass, init_integration):
         {"core": "SNES", "filename": "new.png", "modified": "2026-05-30"},
     ]
     image_entity = MisterScreenshotImage(hass, coordinator, entry)
-    with patch.object(
-        coordinator.client, "async_get_screenshots", new=AsyncMock(return_value=shots)
-    ), patch.object(
-        coordinator.client,
-        "async_get_screenshot_image",
-        new=AsyncMock(return_value=b"\x89PNG-new"),
-    ) as mock_img:
+    with (
+        patch.object(
+            coordinator.client,
+            "async_get_screenshots",
+            new=AsyncMock(return_value=shots),
+        ),
+        patch.object(
+            coordinator.client,
+            "async_get_screenshot_image",
+            new=AsyncMock(return_value=b"\x89PNG-new"),
+        ) as mock_img,
+    ):
         data = await image_entity.async_image()
     assert data == b"\x89PNG-new"
     mock_img.assert_awaited_once_with("SNES", "new.png")

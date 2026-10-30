@@ -1,15 +1,15 @@
 """Diagnostics support for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
 from dataclasses import asdict
 from typing import Any
 
 from homeassistant.components.diagnostics import async_redact_data
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import CONF_RA_API_KEY, CONF_SSH_PASSWORD, CONF_WEBHOOK_ID, DOMAIN
-from .coordinator import MisterDataUpdateCoordinator
+from . import MisterConfigEntry
+from .const import CONF_RA_API_KEY, CONF_SSH_PASSWORD, CONF_WEBHOOK_ID
 
 TO_REDACT = {CONF_SSH_PASSWORD, CONF_RA_API_KEY, CONF_WEBHOOK_ID}
 
@@ -22,9 +22,9 @@ def _ra_web_diagnostics(coordinator) -> dict | None:
 
 
 async def async_get_config_entry_diagnostics(
-    hass: HomeAssistant, entry: ConfigEntry
+    hass: HomeAssistant, entry: MisterConfigEntry
 ) -> dict[str, Any]:
-    coordinator: MisterDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     return {
         "entry": {
             "title": entry.title,

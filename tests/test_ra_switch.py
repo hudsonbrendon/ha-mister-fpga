@@ -1,8 +1,9 @@
 """RA switch entity tests."""
+
 import types
 
-import pytest
 from homeassistant.exceptions import HomeAssistantError
+import pytest
 
 from custom_components.mister_fpga.switch import (
     MisterRACoresSwitch,
@@ -16,9 +17,7 @@ async def _noop():
 
 def _coord(installed=True, cores_on=False, hardcore=False, ra=None):
     ra_data = (
-        types.SimpleNamespace(
-            installed=installed, cores_on=cores_on, hardcore=hardcore
-        )
+        types.SimpleNamespace(installed=installed, cores_on=cores_on, hardcore=hardcore)
         if installed is not None
         else None
     )

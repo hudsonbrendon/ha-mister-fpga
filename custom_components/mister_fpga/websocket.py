@@ -1,9 +1,10 @@
 """WebSocket listener for real-time MiSTer Remote updates."""
+
 from __future__ import annotations
 
 import asyncio
-import logging
 from dataclasses import replace
+import logging
 
 import aiohttp
 

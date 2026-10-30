@@ -1,8 +1,9 @@
 """Separate slow-poll coordinator for RetroAchievements cloud stats."""
+
 from __future__ import annotations
 
-import logging
 from datetime import timedelta
+import logging
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -18,9 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 class MisterRAWebCoordinator(DataUpdateCoordinator[MisterRAWebStats]):
     """Polls the RetroAchievements.org Web API on its own slow interval."""
 
-    def __init__(
-        self, hass: HomeAssistant, web: MisterRAWeb, interval: int
-    ) -> None:
+    def __init__(self, hass: HomeAssistant, web: MisterRAWeb, interval: int) -> None:
         super().__init__(
             hass,
             _LOGGER,

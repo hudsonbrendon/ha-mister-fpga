@@ -1,20 +1,19 @@
 """Tests for integration setup/unload."""
+
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntryState
-
-from custom_components.mister_fpga.const import DOMAIN
 
 
 async def test_setup_and_unload(hass, init_integration):
     entry, coordinator = await init_integration()
     assert entry.state is ConfigEntryState.LOADED
-    assert entry.entry_id in hass.data[DOMAIN]
+    assert entry.runtime_data is coordinator
     assert coordinator.data.online is True
 
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
-    assert entry.entry_id not in hass.data[DOMAIN]
+    assert entry.state is ConfigEntryState.NOT_LOADED
     coordinator.websocket.stop.assert_awaited_once()
 
 
@@ -30,4 +29,4 @@ async def test_setup_starts_websocket_and_scripts(
     entry, coordinator = await init_integration()
     assert mock_websocket.called
     mock_websocket.return_value.start.assert_called_once()
-    assert entry.entry_id in hass.data["mister_fpga"]
+    assert entry.runtime_data is coordinator

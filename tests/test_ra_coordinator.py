@@ -1,4 +1,5 @@
 """Coordinator RA wiring tests."""
+
 import types
 
 import pytest
@@ -8,6 +9,7 @@ def _make_coordinator():
     from custom_components.mister_fpga.coordinator import (
         MisterDataUpdateCoordinator,
     )
+
     coord = MisterDataUpdateCoordinator.__new__(MisterDataUpdateCoordinator)
     coord.ssh = None
     coord.ra = None

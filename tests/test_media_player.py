@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA media player."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
@@ -40,9 +41,9 @@ async def test_select_source_launches_system(hass, init_integration):
 
 
 async def test_volume_via_ssh(hass, init_integration, mock_ssh):
-    import pytest
     from homeassistant.exceptions import HomeAssistantError
     from mister_fpga import MisterMainUnresponsiveError
+    import pytest
 
     from tests.conftest import SSH_OPTIONS
 
@@ -53,13 +54,17 @@ async def test_volume_via_ssh(hass, init_integration, mock_ssh):
     assert state.attributes["is_volume_muted"] is False
 
     await hass.services.async_call(
-        "media_player", "volume_set",
-        {"entity_id": ENTITY, "volume_level": 0.43}, blocking=True,
+        "media_player",
+        "volume_set",
+        {"entity_id": ENTITY, "volume_level": 0.43},
+        blocking=True,
     )
     mock_ssh.async_set_volume.assert_awaited_once_with(3)
     await hass.services.async_call(
-        "media_player", "volume_mute",
-        {"entity_id": ENTITY, "is_volume_muted": True}, blocking=True,
+        "media_player",
+        "volume_mute",
+        {"entity_id": ENTITY, "is_volume_muted": True},
+        blocking=True,
     )
     mock_ssh.async_set_mute.assert_awaited_once_with(True)
     assert hass.states.get(ENTITY).attributes["is_volume_muted"] is True
@@ -67,8 +72,10 @@ async def test_volume_via_ssh(hass, init_integration, mock_ssh):
     mock_ssh.async_set_volume.side_effect = MisterMainUnresponsiveError("full")
     with pytest.raises(HomeAssistantError):
         await hass.services.async_call(
-            "media_player", "volume_set",
-            {"entity_id": ENTITY, "volume_level": 0.5}, blocking=True,
+            "media_player",
+            "volume_set",
+            {"entity_id": ENTITY, "volume_level": 0.5},
+            blocking=True,
         )
 
 
@@ -86,7 +93,8 @@ async def test_title_falls_back_to_sam_game(
     from tests.conftest import SSH_OPTIONS
 
     mock_ssh.async_probe.return_value = {
-        "sam_active": True, "sam_game": "Breakers (neogeo)",
+        "sam_active": True,
+        "sam_game": "Breakers (neogeo)",
     }
     await init_integration(
         status=make_status(core="NEOGEO", game=None, game_name=None),

@@ -1,4 +1,5 @@
 """RA sensor value-function tests."""
+
 import types
 
 from custom_components.mister_fpga.sensor import RA_SENSORS
@@ -6,9 +7,13 @@ from custom_components.mister_fpga.sensor import RA_SENSORS
 
 def _ra(**kw):
     base = dict(
-        installed=True, cores_on=True, binary_ra=True,
-        hardcore=False, username="hudsonbrendon",
-        cores_active=2, cores_total=15,
+        installed=True,
+        cores_on=True,
+        binary_ra=True,
+        hardcore=False,
+        username="hudsonbrendon",
+        cores_active=2,
+        cores_total=15,
     )
     base.update(kw)
     return types.SimpleNamespace(ra_data=types.SimpleNamespace(**base))

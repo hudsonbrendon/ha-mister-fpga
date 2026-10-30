@@ -1,7 +1,7 @@
-import pytest
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from mister_fpga import MisterRAWebStats
 from mister_fpga.ra_web import MisterRAWebError
+import pytest
 
 from custom_components.mister_fpga.ra_web_coordinator import MisterRAWebCoordinator
 

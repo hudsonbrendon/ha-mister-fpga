@@ -1,4 +1,5 @@
 """Tests for the MiSTer FPGA number entities (INI video settings)."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
@@ -22,7 +23,8 @@ async def test_video_number_set_writes_ini(hass, init_integration):
         coordinator.client, "async_set_ini_values", new=AsyncMock()
     ) as mock:
         await hass.services.async_call(
-            "number", "set_value",
+            "number",
+            "set_value",
             {"entity_id": ENTITY, "value": 70},
             blocking=True,
         )

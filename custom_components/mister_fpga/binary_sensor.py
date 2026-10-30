@@ -1,29 +1,31 @@
 """Binary sensor for the MiSTer FPGA integration."""
+
 from __future__ import annotations
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from mister_fpga import RA_SUPPORTED_SYSTEMS
 
-from .const import DOMAIN
+from . import MisterConfigEntry
 from .entity import MisterEntity
+
+PARALLEL_UPDATES = 0
 
 _RA_SUPPORTED_UPPER = {s.upper() for s in RA_SUPPORTED_SYSTEMS}
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    entry: MisterConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     entities = [
         MisterConnectivitySensor(coordinator, entry),
         MisterGameRunningSensor(coordinator, entry),
