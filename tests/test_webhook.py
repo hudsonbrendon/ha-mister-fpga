@@ -31,8 +31,12 @@ async def test_webhook_updates_entities_and_fires_event(hass, init_integration):
     events = []
     hass.bus.async_listen(EVENT_GAME_CHANGED, lambda e: events.append(e))
 
+    # The webhook is local_only, so the request needs a LAN source address.
     request = MockRequest(
-        json.dumps(ANNOUNCE).encode(), mock_source="test", method="POST"
+        json.dumps(ANNOUNCE).encode(),
+        mock_source="test",
+        method="POST",
+        remote="192.168.31.77",
     )
     resp = await webhook.async_handle_webhook(
         hass, entry.data["webhook_id"], request
