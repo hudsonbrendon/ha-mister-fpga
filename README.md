@@ -1,15 +1,17 @@
 <p align="center">
-  <img src="assets/mister-fpga.png" alt="MiSTer FPGA" width="480">
+  <img src="custom_components/mister_fpga/brand/logo@2x.png" alt="MiSTer FPGA" height="128">
 </p>
 
 # MiSTer FPGA for Home Assistant
 
 [![Tests](https://github.com/hudsonbrendon/ha-mister-fpga/actions/workflows/tests.yml/badge.svg)](https://github.com/hudsonbrendon/ha-mister-fpga/actions/workflows/tests.yml)
 [![Hassfest](https://github.com/hudsonbrendon/ha-mister-fpga/actions/workflows/hassfest.yml/badge.svg)](https://github.com/hudsonbrendon/ha-mister-fpga/actions/workflows/hassfest.yml)
-[![Validate](https://github.com/hudsonbrendon/ha-mister-fpga/actions/workflows/validate.yml/badge.svg)](https://github.com/hudsonbrendon/ha-mister-fpga/actions/workflows/validate.yml)
+[![HACS](https://github.com/hudsonbrendon/ha-mister-fpga/actions/workflows/validate.yml/badge.svg)](https://github.com/hudsonbrendon/ha-mister-fpga/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/hudsonbrendon/ha-mister-fpga?sort=semver)](https://github.com/hudsonbrendon/ha-mister-fpga/releases)
+[![Downloads](https://img.shields.io/github/downloads/hudsonbrendon/ha-mister-fpga/total)](https://github.com/hudsonbrendon/ha-mister-fpga/releases)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/)
-[![Release](https://img.shields.io/github/v/release/hudsonbrendon/ha-mister-fpga)](https://github.com/hudsonbrendon/ha-mister-fpga/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.12.0%2B-18BCF2?logo=homeassistant&logoColor=white)](https://www.home-assistant.io/)
+[![License](https://img.shields.io/github/license/hudsonbrendon/ha-mister-fpga)](LICENSE)
 
 Monitor and control a network-connected **MiSTer FPGA** from Home Assistant over the
 [**mrext "Remote"**](https://github.com/wizzomafizzo/mrext) HTTP API and WebSocket —
